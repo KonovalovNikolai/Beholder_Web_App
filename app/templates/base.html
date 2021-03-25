@@ -8,9 +8,18 @@
         {% endif %}
     </head>
     <body>
-        <div>
-            <a href="{{ url_for("index") }}">Beholder</a>
-            <a href="{{ url_for("login") }}">Sign in</a>
+        <div class="navi_panel">
+            <div class='left_side'>
+                <a href="{{ url_for("index") }}">Beholder</a>
+            </div>
+            <div class="rignt_side">
+                {% if current_user.is_anonymous %}
+                    <a href="{{ url_for("login") }}">Sign in</a>
+                {% else %}
+                    <a href="{{ url_for("logout") }}">Logout</a>
+                    <p>{{current_user.username}}</p>
+                {% endif %}
+            </div>
         </div>
         <hr>
         {% with messages = get_flashed_messages() %}
