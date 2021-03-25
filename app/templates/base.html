@@ -1,0 +1,29 @@
+<!doctype html>
+<html>
+    <head>
+        {% if title %}
+            <title>{{title}} - Beholder</title>
+        {% else %}
+            <title>Beholder</title>
+        {% endif %}
+    </head>
+    <body>
+        <div>
+            <a href="{{ url_for("index") }}">Beholder</a>
+            <a href="{{ url_for("login") }}">Sign in</a>
+        </div>
+        <hr>
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <ul>
+            {% for message in messages %}
+            <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+
+    </body>
+</html>
