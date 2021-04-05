@@ -1,5 +1,5 @@
 from flask import render_template, flash, redirect, request, url_for
-from flask_login import current_user, login_user, logout_user
+from flask_login import current_user, login_user, logout_user, login_required
 
 from app import app
 from app.forms import LoginForm
@@ -9,6 +9,14 @@ from app.models import User
 @app.route('/')
 def index():
     return render_template('index.html', title='Home')
+
+
+@app.route('/user/<int:user_id>')
+@login_required
+def profile(user_id):
+    user = User.query.get(user_id)
+    posts = user.get_posts(limit=5, order_by_time=True)
+    return render_template('user.html', title='User', user=user, posts=posts)
 
 
 @app.route('/login', methods=['GET', 'POST'])
