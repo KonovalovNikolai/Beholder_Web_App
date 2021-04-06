@@ -19,6 +19,12 @@ def profile(user_id):
     return render_template('user.html', title='User', user=user, posts=posts)
 
 
+@app.route('/user/<int:user_id>/edit')
+@login_required
+def edit_profile(user_id):
+    user = User.query.get(user_id)
+
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     # Если пользователь входил ранее
