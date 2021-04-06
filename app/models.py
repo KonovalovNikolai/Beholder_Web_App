@@ -293,7 +293,7 @@ class Student(db.Model):
     visits = db.relationship('Journal', backref='student', lazy='dynamic')
 
     def get_visits(self, limit=None, order_by_time=False, get_all=True):
-        posts = db.session.query(Post).join(Journal).filter(Journal.student_id == 1)
+        posts = db.session.query(Post).join(Journal).filter(Journal.student_id == self.id)
         if order_by_time:
             posts = posts.order_by(db.desc(Post.timestamp))
         if limit:
