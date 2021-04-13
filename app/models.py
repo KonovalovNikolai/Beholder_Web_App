@@ -148,10 +148,10 @@ class User(UserMixin, db.Model):
         """
         photo = self.get_photo()
         if not photo:
-            return app.config['USER_PHOTO_PATH'] + app.config['DEFAULT_PHOTO']
+            return app.config['DEFAULT_PHOTO']
         if photo.is_proved == 0:
-            return app.config['USER_PHOTO_PATH'] + app.config['DEFAULT_PHOTO']
-        return app.config['USER_PHOTO_PATH'] + photo.filename
+            return app.config['DEFAULT_PHOTO']
+        return photo.filename
 
     def delete_photo(self):
         photo = self.get_photo()
