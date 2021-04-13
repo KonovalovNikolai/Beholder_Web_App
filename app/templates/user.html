@@ -11,8 +11,11 @@
         </td>
     </tr>
     </table>
+    {% if current_user.is_can_edit(user) %}
+        <a href="{{ url_for("edit_profile", user_id=user.id) }}">Редактировать</a>
+    {% endif %}
     <hr>
-    {% if user.user_type > 1 %}
+    {% if not user.is_student() %}
         <h2>Your posts</h2>
     {% else %}
         <h2>Your visits</h2>

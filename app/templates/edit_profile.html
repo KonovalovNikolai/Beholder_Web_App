@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>{{ user.get_name() }}: Редактирование профиля.</h1>
+    <img src="{{ url_for('static', filename=user.get_photo_path()) }}">
+
+    <p>Личная информация.</p>
+    <form action="" method="POST">
+        {{ profile_form.hidden_tag() }}
+        <p>
+            {{ profile_form.email.label }}<br>
+            {{ profile_form.email(size=32) }}<br>
+            {% for error in profile_form.email.errors %}
+                <span style="color: red;">{{ error }}</span>
+            {% endfor %}
+        </p>
+        <p>
+            {{ profile_form.firstname.label }}<br>
+            {{ profile_form.firstname(size=32) }}<br>
+        </p>
+        <p>
+            {{ profile_form.lastname.label }}<br>
+            {{ profile_form.lastname(size=32) }}<br>
+        </p>
+        <p>
+            {{ profile_form.patronymic.label }}<br>
+            {{ profile_form.patronymic(size=32) }}<br>
+        </p>
+        <p><input type="submit" name="{{profile_form.form_name}}" value="Редактировать"></p>
+    </form>
+
+    <p>Изменить пароль</p>
+    <form action="" method="POST">
+        {{password_form.hidden_tag()}}
+        <p>
+            {{ password_form.old_password.label }}<br>
+            {{ password_form.old_password(size=32) }}<br>
+            {% for error in password_form.old_password.errors %}
+                <span style="color: red;">{{ error }}</span>
+            {% endfor %}
+        </p>
+        <p>
+            {{ password_form.new_password.label }}<br>
+            {{ password_form.new_password(size=32) }}<br>
+            {% for error in password_form.new_password.errors %}
+                <span style="color: red;">{{ error }}</span>
+            {% endfor %}
+        </p>
+        <p>
+            {{ password_form.repeated_password.label }}<br>
+            {{ password_form.repeated_password(size=32) }}<br>
+            {% for error in password_form.repeated_password.errors %}
+                <span style="color: red;">{{ error }}</span>
+            {% endfor %}
+        </p>
+        <p><input type="submit" name="{{password_form.form_name}}" value="Изменить пароль"></p>
+    </form>
+    <br>
+    <p>Изменить фото.</p>
+    <div>
+        <input type="file" id="cropperfile" />
+        <div style="width:600px;height:400px;">
+            <img src="" id="cropper-img" />
+        </div>
+        <button id="crop">Done</button>
+    </div>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script type="text/javascript" src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.4.1/cropper.js"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/cropper.js') }}"></script>
+    <script>
+        $("#crop").click(function(){
+            canvas = cropper.getCroppedCanvas({
+              width: 250,
+              height: 250,
+            });
+
+            canvas.toBlob(function(blob) {
+                url = URL.createObjectURL(blob);
+                var reader = new FileReader();
+                reader.readAsDataURL(blob);
+                reader.onloadend = function() {
+                   var base64data = reader.result;
+
+                    $.ajax({
+                       type: "POST",
+                       dataType: "json",
+                       url: "{{ url_for('upload_photo', user_id=user.id) }}",
+                       data: {image: base64data},
+                       success: function(data){
+                           console.log(data);
+                       }
+                    });
+                }
+            });
+        })
+    </script>
+{% endblock %}

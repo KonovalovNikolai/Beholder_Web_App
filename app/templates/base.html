@@ -6,6 +6,10 @@
         {% else %}
             <title>Beholder</title>
         {% endif %}
+
+        {% for style in styles %}
+            <link href="{{ style }}" rel="stylesheet">
+        {% endfor %}
     </head>
     <body>
         <div class="navi_panel">

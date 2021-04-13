@@ -1,13 +1,12 @@
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask import flash
 from flask_login import UserMixin
 from datetime import datetime
 
+from app import app
 from app import db
 from app import login
-
-
-USER_PHOTO_PATH = 'img/user_photo/'
-DEFAULT_PHOTO = 'default.png'
+from app.forms import EditProfileForm
 
 
 @login.user_loader
@@ -63,24 +62,6 @@ class User(UserMixin, db.Model):
         """
         return check_password_hash(self.password_hash, password)
 
-    def get_student(self):
-        """
-        Получить соответсвующий пользователю объект студента.
-        Если пользователь не студент - возвращает None.
-        Если также сама создаст объект, если он не был создан раньше.
-        """
-        if self.user_type != 1:
-            return None
-        if not self.student:
-            self._make_student()
-        return self.student[0]
-
-    def is_student(self):
-        student = self.get_student()
-        if student:
-            return True
-        return False
-
     def get_name(self):
         """
         Сформировать ФИО пользователя.
@@ -92,13 +73,12 @@ class User(UserMixin, db.Model):
             name = '{} '.format(self.lastname)
         if self.firstname:
             name = '{}{} '.format(name, self.firstname)
-        if self.patronymic:
-            name = '{}{}'.format(name, self.patronymic)
+        # if self.patronymic:
+        #     name = '{}{}'.format(name, self.patronymic)
         if name == '':
             return self.email
         return name
 
-    # Роли пользователей лучше сделать отдельной таблицей в БД
     def get_role(self):
         """
         Получить название роли пользователя, взависимости от его типа.
@@ -144,9 +124,21 @@ class User(UserMixin, db.Model):
         Получить соответсвующий пользователю объект фото.
         Если объект не существует, возвращает None.
         """
-        if not self.student:
+        if not self.photo:
             return None
-        return self.student[0]
+        return self.photo[0]
+
+    def set_photo(self, filename: str):
+        """
+        Установить пользователю фото.
+        """
+        photo = self.get_photo()
+        if not photo:
+            photo = User_Photo(user=self)
+            db.session.add(photo)
+            photo.set_photo(filename)
+            return
+        photo.set_photo(filename)
 
     def get_photo_path(self):
         """
@@ -156,33 +148,51 @@ class User(UserMixin, db.Model):
         """
         photo = self.get_photo()
         if not photo:
-            return USER_PHOTO_PATH + DEFAULT_PHOTO
-        if self.is_student() and photo.is_proved == 0:
-            return USER_PHOTO_PATH + DEFAULT_PHOTO
-        return USER_PHOTO_PATH + photo.filename
-
-    def set_photo(self, filename: str):
-        """
-        Установить пользователю фото.
-        """
-        photo = self.get_photo()
-        if not photo:
-            photo = User_Photo(user=self, filename=filename, is_proved=1)
-            if self.is_student():
-                photo.is_proved = 0
-            db.session.add(photo)
-            db.session.commit()
-            return
-        photo.filename = filename
-        if self.is_student():
-            photo.is_proved = 0
-        db.session.commit()
+            return app.config['USER_PHOTO_PATH'] + app.config['DEFAULT_PHOTO']
+        if photo.is_proved == 0:
+            return app.config['USER_PHOTO_PATH'] + app.config['DEFAULT_PHOTO']
+        return app.config['USER_PHOTO_PATH'] + photo.filename
 
     def delete_photo(self):
         photo = self.get_photo()
         if photo:
             db.session.delete(photo)
-            db.session.commit()
+
+    def get_student(self):
+        """
+        Получить соответсвующий пользователю объект студента.
+        Если пользователь не студент - возвращает None.
+        Если также сама создаст объект, если он не был создан раньше.
+        """
+        if self.user_type != 1:
+            return None
+        if not self.student:
+            self._make_student()
+        return self.student[0]
+
+    def is_student(self):
+        student = self.get_student()
+        if student:
+            return True
+        return False
+
+    def fill_form(self, form: EditProfileForm):
+        form.email.data = self.email
+        form.firstname.data = self.firstname
+        form.lastname.data = self.lastname
+        form.patronymic.data = self.patronymic
+
+    def update_from_form(self, form: EditProfileForm):
+        self.email = form.email.data
+        self.firstname = form.firstname.data
+        self.lastname = form.lastname.data
+        self.patronymic = form.patronymic.data
+
+    def is_can_edit(self, obj) -> bool:
+        if isinstance(obj, User):
+            if self != obj or self.user_type != 3:
+                return False
+            return True
 
     def _make_student(self):
         """
@@ -278,6 +288,13 @@ class User_Photo(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     filename = db.Column(db.String(64), index=True, unique=True)
     is_proved = db.Column(db.Integer)
+
+    def set_photo(self, filename: str):
+        self.filename = filename
+        if self.user.is_student():
+            self.is_proved = 0
+        else:
+            self.is_proved = 1
 
     def prove(self):
         self.is_proved = 1
