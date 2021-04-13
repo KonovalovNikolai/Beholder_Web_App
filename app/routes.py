@@ -88,6 +88,18 @@ def edit_profile(user_id):
                            styles=["https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.4.1/cropper.css"])
 
 
+@app.route('/user/<int:user_id>/posts')
+@login_required
+def user_posts(user_id):
+    user = User.query.get(user_id)
+    page = request.args.get('page', 1, type=int)
+    posts = user.get_posts(get_all=False).paginate(page, 10, True)
+    next_url = url_for("user_posts", user_id=user.id, page=posts.next_num) if posts.has_next else None
+    prev_url = url_for("user_posts", user_id=user.id, page=posts.prev_num) if posts.has_prev else None
+    return render_template('user_posts.html', title='Ваши посты', user=user, posts=posts.items, next_url=next_url,
+                           prev_url=prev_url)
+
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     # Если пользователь входил ранее
@@ -95,7 +107,7 @@ def login():
         return redirect(url_for('index'))
 
     form = LoginForm()
-    
+
     # Проверка корректности данных, если метод POST
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
@@ -107,7 +119,7 @@ def login():
 
         login_user(user, remember=form.remember_me.data)
         return redirect(url_for('index'))
-    
+
     return render_template('login.html', title='Sing In', form=form)
 
 

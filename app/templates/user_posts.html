@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+    {% if not posts %}
+        <p>You don't have any posts yet.</p>
+    {% else %}
+        {% for post in posts %}
+            <p>User: {{ post.author.get_name() }} time: {{ post.timestamp }}</p>
+        {% endfor %}
+    {% endif %}
+    {% if prev_url %}
+        <a href="{{ prev_url }}">Newer posts</a>
+    {% endif %}
+    {% if next_url %}
+        <a href="{{ next_url }}">Older posts</a>
+    {% endif %}
+{% endblock %}
