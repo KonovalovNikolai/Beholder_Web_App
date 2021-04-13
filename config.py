@@ -10,3 +10,4 @@ class Config(object):
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     USER_PHOTO_PATH = 'img/user_photo/'
     DEFAULT_PHOTO = 'default.png'
+    SEND_FILE_MAX_AGE_DEFAULT = 0

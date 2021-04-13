@@ -1,10 +1,15 @@
-from flask import render_template, flash, redirect, request, url_for, abort, jsonify
+from flask import render_template, flash, redirect, request, url_for, abort, jsonify, send_from_directory
 from flask_login import current_user, login_user, logout_user, login_required
 import base64
 
 from app import app, db
 from app.forms import LoginForm, EditProfileForm, ChangePasswordForm
 from app.models import User
+
+
+@app.route('/user_photos/<path:filename>')
+def file(filename):
+    return send_from_directory(app.config["USER_PHOTO_PATH"], filename, as_attachment=True)
 
 
 @app.route('/')
@@ -43,7 +48,7 @@ def upload_photo(user_id):
 
     image = image[22:]
     filename = f'{user_id}.jpg'
-    path = f'./app/static/{app.config["USER_PHOTO_PATH"]}{filename}'
+    path = f'./app/{app.config["USER_PHOTO_PATH"]}{filename}'
 
     with open(path, 'wb') as f:
         f.write(base64.b64decode(image))
