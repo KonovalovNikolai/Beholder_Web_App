@@ -16,6 +16,10 @@ def index():
 @login_required
 def profile(user_id):
     user = User.query.get(user_id)
+
+    if not user:
+        abort(404)
+
     posts = user.get_posts(limit=5, order_by_time=True)
     return render_template('user.html', title='User', user=user, posts=posts)
 
@@ -26,6 +30,9 @@ def upload_photo(user_id):
         return jsonify('error')
 
     user = User.query.get(user_id)
+
+    if not user:
+        return jsonify('error')
 
     if not current_user.is_can_edit(user):
         return jsonify('error')
@@ -47,16 +54,13 @@ def upload_photo(user_id):
     return jsonify('done')
 
 
-# @app.route('/cropper')
-# @login_required
-# def crop():
-#     return render_template('crop_test.html')
-
-
 @app.route('/user/<int:user_id>/edit', methods=['GET', 'POST'])
 @login_required
 def edit_profile(user_id):
     user = User.query.get(user_id)
+
+    if not user:
+        abort(404)
 
     # Проверка прав пользователя
     if not current_user.is_can_edit(user):
@@ -92,6 +96,10 @@ def edit_profile(user_id):
 @login_required
 def user_posts(user_id):
     user = User.query.get(user_id)
+
+    if not user:
+        abort(404)
+
     page = request.args.get('page', 1, type=int)
     posts = user.get_posts(get_all=False).paginate(page, 10, True)
     next_url = url_for("user_posts", user_id=user.id, page=posts.next_num) if posts.has_next else None
