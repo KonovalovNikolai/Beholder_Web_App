@@ -2,7 +2,7 @@
 
 {% block content %}
     <h1>{{ user.get_name() }}: Редактирование профиля.</h1>
-    <img src="{{ url_for('file', filename=user.get_photo_path()) }}" alt="User avatar">
+    <img src="{{ url_for('avatar', filename=user.get_avatar_name()) }}" alt="User avatar" id="avatar">
 
     <p>Личная информация.</p>
     <form action="" method="POST">
@@ -55,7 +55,7 @@
         </p>
         <p><input type="submit" name="{{password_form.form_name}}" value="Изменить пароль"></p>
     </form>
-    <br>
+
     <p>Изменить фото.</p>
     <div>
         <input type="file" id="cropperfile" />
@@ -64,36 +64,4 @@
         </div>
         <button id="crop">Done</button>
     </div>
-    <script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-    <script type="text/javascript" src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.4.1/cropper.js"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='js/cropper.js') }}"></script>
-    <script>
-        $("#crop").click(function(){
-            canvas = cropper.getCroppedCanvas({
-              width: 250,
-              height: 250,
-            });
-
-            canvas.toBlob(function(blob) {
-                url = URL.createObjectURL(blob);
-                var reader = new FileReader();
-                reader.readAsDataURL(blob);
-                reader.onloadend = function() {
-                   var base64data = reader.result;
-
-                    $.ajax({
-                       type: "POST",
-                       dataType: "json",
-                       url: "{{ url_for('upload_photo', user_id=user.id) }}",
-                       data: {image: base64data},
-                       success: function(data){
-                           console.log(data);
-                       }
-                    });
-                }
-            });
-        })
-    </script>
 {% endblock %}

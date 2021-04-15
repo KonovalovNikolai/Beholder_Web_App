@@ -43,7 +43,7 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(128))
 
     student = db.relationship('Student', backref=db.backref('user', uselist=False))
-    photo = db.relationship('User_Photo', backref=db.backref('user', uselist=False))
+    avatar = db.relationship('Avatar', backref=db.backref('user', uselist=False))
     posts = db.relationship('Post', backref='author', lazy='dynamic')
 
     def set_password(self, password: str):
@@ -119,44 +119,44 @@ class User(UserMixin, db.Model):
             posts = posts.all()
         return posts
 
-    def get_photo(self):
+    def get_avatar(self):
         """
         Получить соответсвующий пользователю объект фото.
         Если объект не существует, возвращает None.
         """
-        if not self.photo:
+        if not self.avatar:
             return None
-        return self.photo[0]
+        return self.avatar[0]
 
-    def set_photo(self, filename: str):
+    def set_avatar(self, filename: str):
         """
         Установить пользователю фото.
         """
-        photo = self.get_photo()
-        if not photo:
-            photo = User_Photo(user=self)
-            db.session.add(photo)
-            photo.set_photo(filename)
+        avatar = self.get_avatar()
+        if not avatar:
+            avatar = Avatar(user=self)
+            db.session.add(avatar)
+            avatar.set(filename)
             return
-        photo.set_photo(filename)
+        avatar.set(filename)
 
-    def get_photo_path(self):
+    def get_avatar_name(self):
         """
         Получить путь к фотографии пользователя.
         Если у пользователя нет фото, вернётся путь к стандартной иконке.
         Если пользователь студент и его фото не проверенно, то вернётся стандартная иконка.
         """
-        photo = self.get_photo()
-        if not photo:
-            return app.config['DEFAULT_PHOTO']
-        if photo.is_proved == 0:
-            return app.config['DEFAULT_PHOTO']
-        return photo.filename
+        avatar = self.get_avatar()
+        if not avatar:
+            return app.config['DEFAULT_AVATAR']
+        if avatar.is_proved == 0:
+            return app.config['DEFAULT_AVATAR']
+        return avatar.filename
 
-    def delete_photo(self):
-        photo = self.get_photo()
-        if photo:
-            db.session.delete(photo)
+    def delete_avatar(self):
+        avatar = self.get_avatar()
+        if avatar:
+            db.session.delete(avatar)
 
     def get_student(self):
         """
@@ -273,9 +273,9 @@ class Post_Photo(db.Model):
     filename = db.Column(db.String(64), index=True, unique=True)
 
 
-class User_Photo(db.Model):
+class Avatar(db.Model):
     """
-    Модель фотографии студента.
+    Модель аватара пользователя.
     id: int - первичный ключ (при создании объекта назначается сам!).
     user_id: int - id пользователя (назначается сам!).
     filename: str - название файла. Обязательно при создании!
@@ -289,7 +289,7 @@ class User_Photo(db.Model):
     filename = db.Column(db.String(64), index=True, unique=True)
     is_proved = db.Column(db.Integer)
 
-    def set_photo(self, filename: str):
+    def set(self, filename: str):
         self.filename = filename
         if self.user.is_student():
             self.is_proved = 0
