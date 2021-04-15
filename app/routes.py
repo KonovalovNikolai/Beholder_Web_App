@@ -7,14 +7,46 @@ from app.forms import LoginForm, EditProfileForm, ChangePasswordForm
 from app.models import User
 
 
-@app.route('/user_photos/<path:filename>')
-def file(filename):
-    return send_from_directory(app.config["USER_PHOTO_PATH"], filename, as_attachment=True)
+@app.route('/avatar/<path:filename>')
+def avatar(filename):
+    return send_from_directory(app.config["AVATARS_PATH"], filename, as_attachment=True)
 
 
 @app.route('/')
 def index():
     return render_template('index.html', title='Home')
+
+
+@app.route('/api/upload_avatar/<int:user_id>', methods=['POST'])
+def upload_avatar(user_id):
+    if current_user.is_anonymous:
+        return jsonify(status='Ok', result='Error')
+
+    user = User.query.get(user_id)
+    if not user or not current_user.is_can_edit(user):
+        return jsonify(status='Ok', result='Error')
+
+    image = None
+    if request.method == 'POST' and 'blob' in request.form:
+        image = request.form.get('blob')
+        if not image:
+            return jsonify(status='Ok', result='Error')
+
+    print(image[:23])
+    image = image[22:]
+    filename = f'{user_id}.png'
+    path = f'./app/{app.config["AVATARS_PATH"]}{filename}'
+
+    with open(path, 'wb') as f:
+        try:
+            f.write(base64.b64decode(image))
+        except:
+            return jsonify(status='Ok', result='Error')
+
+    user.set_avatar(filename)
+    db.session.commit()
+
+    return jsonify(status='Ok', result='Done')
 
 
 @app.route('/user/<int:user_id>')
@@ -27,36 +59,6 @@ def profile(user_id):
 
     posts = user.get_posts(limit=5, order_by_time=True)
     return render_template('user.html', title='User', user=user, posts=posts)
-
-
-@app.route('/api/upload_user_photo/<int:user_id>', methods=['POST'])
-def upload_photo(user_id):
-    if current_user.is_anonymous:
-        return jsonify('error')
-
-    user = User.query.get(user_id)
-
-    if not user:
-        return jsonify('error')
-
-    if not current_user.is_can_edit(user):
-        return jsonify('error')
-
-    image = None
-    if request.method == 'POST':
-        image = request.form.get('image')
-
-    image = image[22:]
-    filename = f'{user_id}.jpg'
-    path = f'./app/{app.config["USER_PHOTO_PATH"]}{filename}'
-
-    with open(path, 'wb') as f:
-        f.write(base64.b64decode(image))
-
-    user.set_photo(filename)
-    db.session.commit()
-
-    return jsonify('done')
 
 
 @app.route('/user/<int:user_id>/edit', methods=['GET', 'POST'])
@@ -94,7 +96,12 @@ def edit_profile(user_id):
 
     return render_template('edit_profile.html', title='Edit profile', user=user,
                            profile_form=profile_form, password_form=password_form,
-                           styles=["https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.4.1/cropper.css"])
+                           styles=["https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.4.1/cropper.css"],
+                           scripts=['https://code.jquery.com/jquery-3.3.1.min.js',
+                                    'https://code.jquery.com/ui/1.12.1/jquery-ui.js',
+                                    'https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js',
+                                    'https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.4.1/cropper.js',
+                                    url_for('static', filename='js/cropper.js')])
 
 
 @app.route('/user/<int:user_id>/posts')

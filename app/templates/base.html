@@ -1,5 +1,3 @@
-{% extends 'bootstrap/base.html' %}
-
 <!doctype html>
 <html lang="ru">
 <head>
@@ -9,15 +7,12 @@
         <title>Beholder</title>
     {% endif %}
 
-    {% for style in styles %}
-        <link href="{{ style }}" rel="stylesheet">
-    {% endfor %}
-
     {% block styles %}
         <link rel="stylesheet"
               href="{{ url_for('.static', filename='css/bootstrap.css') }}">
     {% endblock %}
 </head>
+<body>
 {% block navbar %}
     <nav class="navbar bg-dark navbar-dark navbar-expand-md">
         <a class="navbar-brand" href="{{ url_for("index") }}">Beholder</a>
@@ -63,8 +58,10 @@
 {% endwith %}
 
 {% block content %}{% endblock %}
+
 {% block scripts %}
     <script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
     <script src="{{ url_for('.static', filename='js/bootstrap.js') }}"></script>
 {% endblock %}
+</body>
 </html>

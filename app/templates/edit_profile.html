@@ -2,7 +2,7 @@
 
 {% block content %}
     <h1>{{ user.get_name() }}: Редактирование профиля.</h1>
-    <img src="{{ url_for('file', filename=user.get_photo_path()) }}" alt="User avatar">
+    <img src="{{ url_for('avatar', filename=user.get_avatar_name()) }}" alt="User avatar" id="avatar">
 
     <p>Личная информация.</p>
     <form action="" method="POST">

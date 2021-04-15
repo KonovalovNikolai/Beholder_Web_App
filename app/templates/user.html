@@ -4,8 +4,7 @@
     <h1>{{ user.get_name() }}</h1>
     <table>
     <tr valign="top">
-<!--        <td><img src="{{ url_for('static', filename=user.get_photo_path()) }}" alt="User avatar"></td>-->
-        <td><img src="{{ url_for('file', filename=user.get_photo_path()) }}" alt="User avatar"></td>
+        <td><img src="{{ url_for('avatar', filename=user.get_avatar_name()) }}" alt="User avatar" id="avatar"></td>
         <td>
             <h2>Email: {{ user.email }}</h2>
             <h2>Role: {{ user.get_role() }}</h2>
