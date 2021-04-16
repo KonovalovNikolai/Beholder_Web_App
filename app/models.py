@@ -2,6 +2,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask import flash
 from flask_login import UserMixin
 from datetime import datetime
+import numpy as np
+import json
 
 from app import app
 from app import db
@@ -140,7 +142,7 @@ class User(UserMixin, db.Model):
             return
         avatar.set(filename)
 
-    def get_avatar_name(self):
+    def get_avatar_name(self, check_is_proved=True):
         """
         Получить путь к фотографии пользователя.
         Если у пользователя нет фото, вернётся путь к стандартной иконке.
@@ -149,7 +151,7 @@ class User(UserMixin, db.Model):
         avatar = self.get_avatar()
         if not avatar:
             return app.config['DEFAULT_AVATAR']
-        if avatar.is_proved == 0:
+        if check_is_proved and avatar.is_proved == 0:
             return app.config['DEFAULT_AVATAR']
         return avatar.filename
 
@@ -318,3 +320,11 @@ class Student(db.Model):
         if get_all:
             posts = posts.all()
         return posts
+
+    def get_vector(self):
+        return np.array(json.loads(self.vector))
+
+    def set_vector(self, array):
+        data = json.dumps(array.tolist())
+        self.vector = data
+        db.session.commit()

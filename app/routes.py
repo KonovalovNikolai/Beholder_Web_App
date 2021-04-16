@@ -48,7 +48,6 @@ def upload_avatar(user_id):
 
     return jsonify(status='Ok', result='Done')
 
-
 @app.route('/user/<int:user_id>')
 @login_required
 def profile(user_id):

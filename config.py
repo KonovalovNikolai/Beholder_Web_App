@@ -8,6 +8,6 @@ class Config(object):
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
                               'sqlite:///' + os.path.join(basedir, 'app.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    AVATARS_PATH = 'img/user_photo/'
+    AVATARS_PATH = 'img/avatars/'
     DEFAULT_AVATAR = 'default.png'
     SEND_FILE_MAX_AGE_DEFAULT = 0
