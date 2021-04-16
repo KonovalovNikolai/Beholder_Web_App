@@ -1,7 +1,11 @@
 {% extends "base.html" %}
 
+{% block styles %}
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.4.1/cropper.css" rel="stylesheet">
+{% endblock %}
+
 {% block content %}
-    <h1>{{ user.get_name() }}: Редактирование профиля.</h1>
+    <h1>{{ user.get_fullname() }}: Редактирование профиля.</h1>
     <img src="{{ url_for('avatar', filename=user.get_avatar_name()) }}" alt="User avatar" id="avatar">
 
     <p>Личная информация.</p>
@@ -62,37 +66,64 @@
         <div style="width:600px;height:400px;">
             <img src="" id="cropper-img" />
         </div>
-        <button id="crop">Done</button>
+        <button id="crop">Загрузить</button>
     </div>
+{% endblock %}
+
+{% block scripts %}
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
     <script type="text/javascript" src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.4.1/cropper.js"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/cropper.js') }}"></script>
     <script>
-        $("#crop").click(function(){
-            canvas = cropper.getCroppedCanvas({
-              width: 250,
-              height: 250,
-            });
+    $("#crop").click(function(){
+        $(this).attr('disabled','disabled');
+        if (cropper == '') {
+            alert('Загрузить фото');
+            return false;
+        }
 
-            canvas.toBlob(function(blob) {
-                url = URL.createObjectURL(blob);
-                var reader = new FileReader();
-                reader.readAsDataURL(blob);
-                reader.onloadend = function() {
-                   var base64data = reader.result;
+        canvas = cropper.getCroppedCanvas({
+          width: 250,
+          height: 250,
+        });
 
-                    $.ajax({
-                       type: "POST",
-                       dataType: "json",
-                       url: "{{ url_for('upload_photo', user_id=user.id) }}",
-                       data: {image: base64data},
-                       success: function(data){
-                           console.log(data);
-                       }
-                    });
-                }
-            });
+        canvas.toBlob(function(blob) {
+            var reader = new FileReader();
+            reader.readAsDataURL(blob);
+            reader.onloadend = function() {
+
+                var url = '{{ url_for('upload_avatar', user_id=user.id) }}';
+                var data = new FormData();
+
+                blob = reader.result;
+                data.append("blob", blob);
+
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    cache: false,
+                    data: data,
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        if(response["result"] == "Done"){
+                            alert('Фото загружено');
+                            document.location.reload();
+                        }
+                        else{
+                            alert('Произошла ошибка');
+                            $("#crop").removeAttr('disabled');
+                        }
+                    },
+                    error: function(response) {
+                        console.log(response);
+                        $("#crop").removeAttr('disabled');
+                    }
+                })
+            }
         })
+    });
     </script>
 {% endblock %}

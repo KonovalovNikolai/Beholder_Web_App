@@ -1,11 +1,9 @@
-from werkzeug.security import generate_password_hash, check_password_hash
-from flask import flash
-from flask_login import UserMixin
 from datetime import datetime
 
-from app import app
-from app import db
-from app import login
+from flask_login import UserMixin
+from werkzeug.security import check_password_hash, generate_password_hash
+
+from app import app, db, login
 from app.forms import EditProfileForm
 
 
@@ -62,19 +60,19 @@ class User(UserMixin, db.Model):
         """
         return check_password_hash(self.password_hash, password)
 
-    def get_name(self):
+    def get_fullname(self):
         """
         Сформировать ФИО пользователя.
         Если одно из полей ФИО не указано, оно пропускается.
         Если ни одно из полей не задано, то вернёт указанный email вместо ФИО.
         """
         name = ''
-        if self.lastname:
-            name = '{} '.format(self.lastname)
-        if self.firstname:
-            name = '{}{} '.format(name, self.firstname)
-        # if self.patronymic:
-        #     name = '{}{}'.format(name, self.patronymic)
+
+        if self.lastname and self.firstname and self.patronymic:
+            name = '{} {} {}'.format(self.lastname, self.firstname, self.patronymic)
+        elif self.lastname and self.firstname:
+            name = '{} {}'.format(self.lastname, self.firstname)
+
         if name == '':
             return self.email
         return name
@@ -176,6 +174,11 @@ class User(UserMixin, db.Model):
             return True
         return False
 
+    def is_moderator(self):
+        if self.user_type == 3:
+            return True
+        return False
+
     def fill_form(self, form: EditProfileForm):
         form.email.data = self.email
         form.firstname.data = self.firstname
@@ -205,7 +208,7 @@ class User(UserMixin, db.Model):
         db.session.commit()
 
     def __repr__(self):
-        return '<User {}>'.format(self.get_name())
+        return '<User {}>'.format(self.get_fullname())
 
 
 class Post(db.Model):
