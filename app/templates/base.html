@@ -1,45 +1,43 @@
 <!doctype html>
-<html>
-    <head>
-        {% if title %}
-            <title>{{title}} - Beholder</title>
-        {% else %}
-            <title>Beholder</title>
-        {% endif %}
+<html lang="ru">
+<head>
+    {% if title %}
+        <title>{{ title }} - Beholder</title>
+    {% else %}
+        <title>Beholder</title>
+    {% endif %}
 
-        {% for style in styles %}
-            <link href="{{ style }}" rel="stylesheet">
-        {% endfor %}
-    </head>
-    <body>
-        <div class="navi_panel">
-            <div class='left_side'>
-                <a href="{{ url_for("index") }}">Beholder</a>
-            </div>
-            <div class="rignt_side">
-                {% if current_user.is_anonymous %}
-                    <a href="{{ url_for("login") }}">Sign in</a>
-                {% else %}
-                    <a href="{{ url_for("logout") }}">Logout</a>
-                    <a href="{{ url_for('profile', user_id=current_user.id) }}">{{ current_user.get_name() }}</a>
-                {% endif %}
-            </div>
-        </div>
-        <hr>
-        {% with messages = get_flashed_messages() %}
-        {% if messages %}
+    {% block styles %}{% endblock %}
+</head>
+<body>
+<div class="nav_bar">
+    <div class='left_side'>
+        <a href="{{ url_for("index") }}">Beholder</a>
+        {% if current_user.is_moderator() %}
+            <a href="{{ url_for("moderation") }}">Модерация</a>
+        {% endif %}
+    </div>
+    <div class="right_side">
+        {% if current_user.is_anonymous %}
+            <a href="{{ url_for("login") }}">Вход</a>
+        {% else %}
+            <a href="{{ url_for("logout") }}">Выход</a>
+            <a href="{{ url_for('profile', user_id=current_user.id) }}">{{ current_user.get_fullname() }}</a>
+        {% endif %}
+    </div>
+</div>
+<hr>
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
         <ul>
             {% for message in messages %}
-            <li>{{ message }}</li>
+                <li>{{ message }}</li>
             {% endfor %}
         </ul>
-        {% endif %}
-        {% endwith %}
+    {% endif %}
+{% endwith %}
 
-        {% block content %}{% endblock %}
-
-        {% for script in scripts %}
-            <script type="text/javascript" src="{{ script }}"></script>
-        {% endfor %}
-    </body>
+{% block content %}{% endblock %}
+{% block scripts %}{% endblock %}
+</body>
 </html>

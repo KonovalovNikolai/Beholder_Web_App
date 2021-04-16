@@ -2,16 +2,16 @@
 
 {% block content %}
     {% if not posts %}
-        <p>You don't have any posts yet.</p>
+        <p>У вас нет записей.</p>
     {% else %}
         {% for post in posts %}
-            <p>User: {{ post.author.get_name() }} time: {{ post.timestamp }}</p>
+            {% include '_post.html' %}
         {% endfor %}
     {% endif %}
     {% if prev_url %}
-        <a href="{{ prev_url }}">Newer posts</a>
+        <a href="{{ prev_url }}">Новее</a>
     {% endif %}
     {% if next_url %}
-        <a href="{{ next_url }}">Older posts</a>
+        <a href="{{ next_url }}">Старше</a>
     {% endif %}
 {% endblock %}

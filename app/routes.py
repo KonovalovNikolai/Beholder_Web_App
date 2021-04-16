@@ -1,10 +1,12 @@
-from flask import render_template, flash, redirect, request, url_for, abort, jsonify, send_from_directory
-from flask_login import current_user, login_user, logout_user, login_required
 import base64
+import binascii
+
+from flask import abort, flash, jsonify, redirect, render_template, request, send_from_directory, url_for
+from flask_login import current_user, login_required, login_user, logout_user
 
 from app import app, db
-from app.forms import LoginForm, EditProfileForm, ChangePasswordForm
-from app.models import User
+from app.forms import ChangePasswordForm, EditProfileForm, LoginForm
+from app.models import Avatar, User
 
 
 @app.route('/avatar/<path:filename>')
@@ -40,7 +42,7 @@ def upload_avatar(user_id):
     with open(path, 'wb') as f:
         try:
             f.write(base64.b64decode(image))
-        except:
+        except binascii.Error:
             return jsonify(status='Ok', result='Error')
 
     user.set_avatar(filename)
@@ -94,13 +96,7 @@ def edit_profile(user_id):
     user.fill_form(profile_form)
 
     return render_template('edit_profile.html', title='Edit profile', user=user,
-                           profile_form=profile_form, password_form=password_form,
-                           styles=["https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.4.1/cropper.css"],
-                           scripts=['https://code.jquery.com/jquery-3.3.1.min.js',
-                                    'https://code.jquery.com/ui/1.12.1/jquery-ui.js',
-                                    'https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js',
-                                    'https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.4.1/cropper.js',
-                                    url_for('static', filename='js/cropper.js')])
+                           profile_form=profile_form, password_form=password_form)
 
 
 @app.route('/user/<int:user_id>/posts')
@@ -115,6 +111,7 @@ def user_posts(user_id):
     posts = user.get_posts(get_all=False).paginate(page, 10, True)
     next_url = url_for("user_posts", user_id=user.id, page=posts.next_num) if posts.has_next else None
     prev_url = url_for("user_posts", user_id=user.id, page=posts.prev_num) if posts.has_prev else None
+
     return render_template('user_posts.html', title='Ваши посты', user=user, posts=posts.items, next_url=next_url,
                            prev_url=prev_url)
 
@@ -133,16 +130,31 @@ def login():
 
         # Проверка введённых
         if user is None or not user.check_password(form.password.data):
-            flash('Invalid username or password')
+            flash('Неверная почта или пароль.')
             return redirect(url_for('login'))
 
         login_user(user, remember=form.remember_me.data)
         return redirect(url_for('index'))
 
-    return render_template('login.html', title='Sing In', form=form)
+    return render_template('login.html', title='Вход', form=form)
 
 
 @app.route('/logout')
 def logout():
     logout_user()
     return redirect(url_for('index'))
+
+
+@app.route('/moderation')
+@login_required
+def moderation():
+    if not current_user.is_moderator():
+        abort(403)
+
+    avatar_page = request.args.get('page', 1, type=int)
+    avatars = db.session.query(Avatar).filter(Avatar.is_proved == 0).paginate(avatar_page, 10, True)
+    next_url = url_for("moderation", page=avatars.next_num) if avatars.has_next else None
+    prev_url = url_for("moderation", page=avatars.prev_num) if avatars.has_prev else None
+
+    return render_template('moderation.html', title='Модерация', avatars=avatars.items, next_url=next_url,
+                           prev_url=prev_url)
