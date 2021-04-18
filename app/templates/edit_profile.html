@@ -1,7 +1,9 @@
 {% extends "base.html" %}
 
 {% block styles %}
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.4.1/cropper.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.4.1/cropper.min.css"
+          integrity="sha512-Yq9lAK/eVwL0/wCk3u2f5qtGqqrbm7fXNTjhzqwk8vyLp2UmNt79cGPgWyxyUB//AmCNN1d6od+PA+D+btyWjQ=="
+          crossorigin="anonymous"/>
 {% endblock %}
 
 {% block content %}
@@ -30,12 +32,12 @@
             {{ profile_form.patronymic.label }}<br>
             {{ profile_form.patronymic(size=32) }}<br>
         </p>
-        <p><input type="submit" name="{{profile_form.form_name}}" value="Редактировать"></p>
+        <p><input type="submit" name="{{ profile_form.form_name }}" value="Редактировать"></p>
     </form>
 
     <p>Изменить пароль</p>
     <form action="" method="POST">
-        {{password_form.hidden_tag()}}
+        {{ password_form.hidden_tag() }}
         <p>
             {{ password_form.old_password.label }}<br>
             {{ password_form.old_password(size=32) }}<br>
@@ -57,73 +59,80 @@
                 <span style="color: red;">{{ error }}</span>
             {% endfor %}
         </p>
-        <p><input type="submit" name="{{password_form.form_name}}" value="Изменить пароль"></p>
+        <p><input type="submit" name="{{ password_form.form_name }}" value="Изменить пароль"></p>
     </form>
     <br>
     <p>Изменить фото.</p>
     <div>
-        <input type="file" id="cropperfile" />
-        <div style="width:600px;height:400px;">
-            <img src="" id="cropper-img" />
+        <input type="file" id="cropperfile"/>
+        <div style="width:600px;height:600px;">
+            <img src="" id="cropper-img"/>
         </div>
         <button id="crop">Загрузить</button>
     </div>
 {% endblock %}
 
 {% block scripts %}
-    <script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-    <script type="text/javascript" src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.4.1/cropper.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"
+            integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ=="
+            crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"
+            integrity="sha512-uto9mlQzrs59VwILcLiRYeLKPPbS/bT71da/OEBYEwcdNUk8jYIy+D176RYoop1Da+f9mvkYrmj5MCLZWEtQuA=="
+            crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js"
+            integrity="sha512-0bEtK0USNd96MnO4XhH8jhv3nyRF0eK87pJke6pkYf3cM0uDIhNJy9ltuzqgypoIFXw3JSuiy04tVk4AjpZdZw=="
+            crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.4.1/cropper.min.js"
+            integrity="sha512-QQWbg0x9wiAdLwLWfCmsGPq/KvjlrmVWzoB9bLT/JMYmr2kLRCLCvDkhhVWsdI3cjJQ2tFBPQVlGG/cgcC1DAA=="
+            crossorigin="anonymous"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/cropper.js') }}"></script>
     <script>
-    $("#crop").click(function(){
-        $(this).attr('disabled','disabled');
-        if (cropper == '') {
-            alert('Загрузить фото');
-            return false;
-        }
+        $("#crop").click(function () {
+            $(this).attr('disabled', 'disabled');
+            if (cropper == '') {
+                alert('Загрузить фото');
+                return false;
+            }
 
-        canvas = cropper.getCroppedCanvas({
-          width: 250,
-          height: 250,
-        });
+            canvas = cropper.getCroppedCanvas({
+                width: 250,
+                height: 250,
+            });
 
-        canvas.toBlob(function(blob) {
-            var reader = new FileReader();
-            reader.readAsDataURL(blob);
-            reader.onloadend = function() {
+            canvas.toBlob(function (blob) {
+                var reader = new FileReader();
+                reader.readAsDataURL(blob);
+                reader.onloadend = function () {
 
-                var url = '{{ url_for('upload_avatar', user_id=user.id) }}';
-                var data = new FormData();
+                    var url = '{{ url_for('upload_avatar', user_id=user.id) }}';
+                    var data = new FormData();
 
-                blob = reader.result;
-                data.append("blob", blob);
+                    blob = reader.result;
+                    data.append("blob", blob);
 
-                $.ajax({
-                    url: url,
-                    type: 'POST',
-                    cache: false,
-                    data: data,
-                    processData: false,
-                    contentType: false,
-                    success: function(response) {
-                        if(response["result"] == "Done"){
-                            alert('Фото загружено');
-                            document.location.reload();
-                        }
-                        else{
-                            alert('Произошла ошибка');
+                    $.ajax({
+                        url: url,
+                        type: 'POST',
+                        cache: false,
+                        data: data,
+                        processData: false,
+                        contentType: false,
+                        success: function (response) {
+                            if (response["result"] == "Done") {
+                                alert('Фото загружено');
+                                document.location.reload();
+                            } else {
+                                alert('Произошла ошибка');
+                                $("#crop").removeAttr('disabled');
+                            }
+                        },
+                        error: function (response) {
+                            console.log(response);
                             $("#crop").removeAttr('disabled');
                         }
-                    },
-                    error: function(response) {
-                        console.log(response);
-                        $("#crop").removeAttr('disabled');
-                    }
-                })
-            }
-        })
-    });
+                    })
+                }
+            })
+        });
     </script>
 {% endblock %}
