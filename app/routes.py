@@ -30,11 +30,6 @@ def avatar(filename):
     return send_from_directory(app.config["AVATARS_PATH"], filename, as_attachment=True)
 
 
-@app.route('/')
-def index():
-    return render_template('index.html', title='Home')
-
-
 @app.route('/api/upload_avatar/<int:user_id>', methods=['POST'])
 def upload_avatar(user_id):
     if current_user.is_anonymous:
@@ -55,6 +50,31 @@ def upload_avatar(user_id):
         return jsonify(status='Ok', result='Done')
 
     return jsonify(status='Ok', result='Error')
+
+
+@app.route('/api/approve', methods=['POST'])
+def approve_avatar():
+    if current_user.is_anonymous or not current_user.is_moderator():
+        return jsonify(status='Ok', result='Error')
+
+    if 'id' not in request.form:
+        return jsonify(status='Ok', result='Error')
+
+    avatar_id = request.form.get('id')
+    avatar = Avatar.query.get(avatar_id)
+
+    if not avatar:
+        return jsonify(status='Ok', result='Error')
+
+    avatar.is_proved = 1
+    db.session.commit()
+
+    return jsonify(status='Ok', result='Done')
+
+
+@app.route('/')
+def index():
+    return render_template('index.html', title='Home')
 
 
 @app.route('/posts')
@@ -181,26 +201,3 @@ def moderation():
 
     return render_template('moderation.html', title='Модерация', avatars=avatars.items, next_url=next_url,
                            prev_url=prev_url)
-
-
-@app.route('/updateAvatarApproval', methods=['POST'])
-def updateAvatarApproval():
-    if current_user.is_anonymous:
-        return jsonify(status='Ok', result='Error')
-
-    if not current_user.is_moderator():
-        return jsonify(status='Ok', result='Error')
-
-    if 'id' not in request.form:
-        return jsonify(status='Ok', result='Error')
-
-    avatarId = request.form.get('id')
-
-    if not avatarId:
-        return jsonify(status='Ok', result='Error')
-
-    avatar = Avatar.query.get(avatarId)
-    avatar.is_proved = 1
-    db.session.commit()
-
-    return jsonify(status='Ok', result='Done')
