@@ -14,33 +14,11 @@
         <title>Beholder</title>
     {% endif %}
 
-    {% block styles %}{% endblock %}
-</head>
-<body>
-<div class="nav_bar">
-    <div class='left_side'>
-        <a href="{{ url_for("index") }}">Beholder</a>
-        <a href="{{ url_for("posts") }}">Записи</a>
-        {% if not current_user.is_anonymous and current_user.is_moderator() %}
-            <a href="{{ url_for("moderation") }}">Модерация</a>
-        {% endif %}
-    </div>
-    <div class="right_side">
-        {% if current_user.is_anonymous %}
-            <a href="{{ url_for("login") }}">Вход</a>
-        {% else %}
-            <a href="{{ url_for("logout") }}">Выход</a>
-            <a href="{{ url_for('profile', user_id=current_user.id) }}">{{ current_user.get_fullname() }}</a>
-        {% endif %}
-    </div>
-</div>
-<hr>
-{% with messages = get_flashed_messages() %}
-    {% if messages %}
+    <link rel="stylesheet" href="{{ url_for('.static', filename='css/bootstrap.css') }}">
+
     {% block styles %}
-        <link rel="stylesheet"
-              href="{{ url_for('.static', filename='css/bootstrap.css') }}">
     {% endblock %}
+
 </head>
 <body>
 {% block navbar %}
@@ -54,7 +32,7 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav mr-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for("index") }}">Записи</a>
+                    <a class="nav-link" href="{{ url_for("posts") }}">Записи</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="{{ url_for('moderation') }}">Модерация</a>
@@ -90,13 +68,16 @@
     {% endif %}
 {% endwith %}
 
-{% block content %}{% endblock %}
-
-{% block scripts %}
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"
-            integrity="sha512-+NqPlbbtM1QqiK8ZAo4Yrj2c4lNQoGv8P79DPtKzj++l5jnN39rHA/xsqn8zE9l0uSoxaCdrOgFs6yjyfbBxSg=="
-            crossorigin="anonymous"></script>
-    <script src="{{ url_for('.static', filename='js/bootstrap.js') }}"></script>
+{% block content %}
 {% endblock %}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"
+        integrity="sha512-+NqPlbbtM1QqiK8ZAo4Yrj2c4lNQoGv8P79DPtKzj++l5jnN39rHA/xsqn8zE9l0uSoxaCdrOgFs6yjyfbBxSg=="
+        crossorigin="anonymous">
+</script>
+<script src="{{ url_for('.static', filename='js/bootstrap.js') }}"></script>
+{% block scripts %}
+{% endblock %}
+
 </body>
 </html>
