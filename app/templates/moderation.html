@@ -59,7 +59,7 @@
                 data.append("id", $(this).data('id'));
 
                 $.ajax({
-                    url: '{{ url_for('updateAvatarApproval') }}',
+                    url: '{{ url_for('approve_avatar') }}',
                     type: 'POST',
                     cache: false,
                     data: data,
