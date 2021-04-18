@@ -1,14 +1,31 @@
 {% extends 'base.html' %}
 
+{% block styles %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fluidbox/2.0.5/css/fluidbox.min.css"
+          integrity="sha512-1gVXQF5Q9gL1HvHBLK0y3IAWCorLY9EU+JMTsLBlXgWfgf6EIS/8B27R/nUq1joeKz2N7ZHCNnLCjc+PuqDqDA=="
+          crossorigin="anonymous"/>
+{% endblock %}
+
 {% block content %}
     {% if not avatars %}
         <p>Нет непроверенных фотографий.</p>
     {% else %}
         {% for avatar in avatars %}
-            <img src="{{ url_for('avatar', filename=avatar.filename) }}">
-            <p>Пользователь: {{ avatar.user.get_fullname() }}.</p>
-            <button id="approve">^</button>
-            <button id="reject">X</button>
+            <div class="approve-box" id="{{ avatar.id }}">
+                <a class="avatar" href="{{ url_for('avatar', filename=avatar.filename) }}" rel="avatars">
+                    <img src="{{ url_for('avatar', filename=avatar.filename) }}" alt="Аватар" width="128px"/>
+                </a>
+
+                <p>Пользователь: {{ avatar.user.get_fullname() }}.</p>
+                <div class="btn-group" role="group" aria-label="Approve or reject avatar">
+                    <button type="button" class="approveBtn btn btn-success" data-id="{{ avatar.id }}"
+                            data-action="approve">&#9745;
+                    </button>
+                    <button type="button" class="approveBtn btn btn-danger" data-id="{{ avatar.id }}"
+                            data-action="reject">&#9746;
+                    </button>
+                </div>
+            </div>
         {% endfor %}
     {% endif %}
     {% if prev_url %}
@@ -17,4 +34,49 @@
     {% if next_url %}
         <a href="{{ next_url }}">Старше</a>
     {% endif %}
+{% endblock %}
+
+{% block scripts %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"
+            integrity="sha512-+NqPlbbtM1QqiK8ZAo4Yrj2c4lNQoGv8P79DPtKzj++l5jnN39rHA/xsqn8zE9l0uSoxaCdrOgFs6yjyfbBxSg=="
+            crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-throttle-debounce/1.1/jquery.ba-throttle-debounce.min.js"
+            integrity="sha512-JZSo0h5TONFYmyLMqp8k4oPhuo6yNk9mHM+FY50aBjpypfofqtEWsAgRDQm94ImLCzSaHeqNvYuD9382CEn2zw=="
+            crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fluidbox/2.0.5/js/jquery.fluidbox.min.js"
+            integrity="sha512-0kQqdmb3fpKtRwrbCZDlmiwuZgDyPAOLDOu/HyAt4py7lAVDXKknqtqS6dFNV8U8JrHZymQxlO9SFPZ2u8dhMw=="
+            crossorigin="anonymous"></script>
+
+    <script>
+        $('.avatar').fluidbox();
+
+        $('.approveBtn').click(function () {
+            let action = $(this).data('action');
+
+            if (action == "approve") {
+                let idAvatar = $(this).data('id');
+                let data = new FormData();
+                data.append("id", $(this).data('id'));
+
+                $.ajax({
+                    url: '{{ url_for('updateAvatarApproval') }}',
+                    type: 'POST',
+                    cache: false,
+                    data: data,
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        if (response["result"] == "Done") {
+                            $(`#${idAvatar}`).remove();
+                        } else {
+                            alert('Произошла ошибка');
+                        }
+                    },
+                    error: function (response) {
+                        console.log(response);
+                    }
+                })
+            }
+        });
+    </script>
 {% endblock %}

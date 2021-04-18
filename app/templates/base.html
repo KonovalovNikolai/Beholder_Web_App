@@ -1,6 +1,13 @@
 <!doctype html>
 <html lang="ru">
 <head>
+    <link rel="apple-touch-icon" sizes="180x180"
+          href="{{ url_for('static', filename='/img/favicon/apple-touch-icon.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32"
+          href="{{ url_for('static', filename='/img/favicon/favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16"
+          href="{{ url_for('static', filename='/img/favicon/favicon-16x16.png') }}">
+
     {% if title %}
         <title>{{ title }} - Beholder</title>
     {% else %}
@@ -30,6 +37,51 @@
 <hr>
 {% with messages = get_flashed_messages() %}
     {% if messages %}
+    {% block styles %}
+        <link rel="stylesheet"
+              href="{{ url_for('.static', filename='css/bootstrap.css') }}">
+    {% endblock %}
+</head>
+<body>
+{% block navbar %}
+    <nav class="navbar bg-dark navbar-dark navbar-expand-md">
+        <a class="navbar-brand" href="{{ url_for("index") }}">Beholder</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for("index") }}">Записи</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('moderation') }}">Модерация</a>
+                </li>
+            </ul>
+
+            <ul class="navbar-nav">
+                {% if current_user.is_anonymous %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for("login") }}">Войти</a>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link"
+                           href="{{ url_for('profile', user_id=current_user.id) }}">{{ current_user.get_fullname() }}</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for("logout") }}">Выйти</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+{% endblock %}
+
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
         <ul>
             {% for message in messages %}
                 <li>{{ message }}</li>
@@ -39,6 +91,12 @@
 {% endwith %}
 
 {% block content %}{% endblock %}
-{% block scripts %}{% endblock %}
+
+{% block scripts %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"
+            integrity="sha512-+NqPlbbtM1QqiK8ZAo4Yrj2c4lNQoGv8P79DPtKzj++l5jnN39rHA/xsqn8zE9l0uSoxaCdrOgFs6yjyfbBxSg=="
+            crossorigin="anonymous"></script>
+    <script src="{{ url_for('.static', filename='js/bootstrap.js') }}"></script>
+{% endblock %}
 </body>
 </html>
