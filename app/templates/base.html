@@ -31,7 +31,10 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav mr-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Записи</a>
+                    <a class="nav-link" href="{{ url_for("index") }}">Записи</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('moderation') }}">Модерация</a>
                 </li>
             </ul>
 
@@ -43,7 +46,7 @@
                 {% else %}
                     <li class="nav-item">
                         <a class="nav-link"
-                           href="{{ url_for('profile', user_id=current_user.id) }}">{{ current_user.get_name() }}</a>
+                           href="{{ url_for('profile', user_id=current_user.id) }}">{{ current_user.get_fullname() }}</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for("logout") }}">Выйти</a>
@@ -67,7 +70,9 @@
 {% block content %}{% endblock %}
 
 {% block scripts %}
-    <script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"
+            integrity="sha512-+NqPlbbtM1QqiK8ZAo4Yrj2c4lNQoGv8P79DPtKzj++l5jnN39rHA/xsqn8zE9l0uSoxaCdrOgFs6yjyfbBxSg=="
+            crossorigin="anonymous"></script>
     <script src="{{ url_for('.static', filename='js/bootstrap.js') }}"></script>
 {% endblock %}
 </body>
