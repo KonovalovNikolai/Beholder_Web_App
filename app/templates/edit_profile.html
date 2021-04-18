@@ -90,39 +90,33 @@
         });
 
         canvas.toBlob(function(blob) {
-            var reader = new FileReader();
-            reader.readAsDataURL(blob);
-            reader.onloadend = function() {
+            var url = '{{ url_for('upload_avatar', user_id=user.id) }}';
+            var data = new FormData();
 
-                var url = '{{ url_for('upload_avatar', user_id=user.id) }}';
-                var data = new FormData();
+            data.append("file", blob, "avatar.jpg");
 
-                blob = reader.result;
-                data.append("blob", blob);
-
-                $.ajax({
-                    url: url,
-                    type: 'POST',
-                    cache: false,
-                    data: data,
-                    processData: false,
-                    contentType: false,
-                    success: function(response) {
-                        if(response["result"] == "Done"){
-                            alert('Фото загружено');
-                            document.location.reload();
-                        }
-                        else{
-                            alert('Произошла ошибка');
-                            $("#crop").removeAttr('disabled');
-                        }
-                    },
-                    error: function(response) {
-                        console.log(response);
+            $.ajax({
+                url: url,
+                type: 'POST',
+                cache: false,
+                data: data,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    if(response["result"] == "Done"){
+                        alert('Фото загружено');
+                        document.location.reload();
+                    }
+                    else{
+                        alert('Произошла ошибка');
                         $("#crop").removeAttr('disabled');
                     }
-                })
-            }
+                },
+                error: function(response) {
+                    console.log(response);
+                    $("#crop").removeAttr('disabled');
+                }
+            })
         })
     });
     </script>

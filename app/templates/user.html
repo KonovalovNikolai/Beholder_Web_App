@@ -16,12 +16,12 @@
     {% endif %}
     <hr>
     {% if not user.is_student() %}
-        <h2>Ваши записи:</h2>
+        <h2>Созданные записи:</h2>
     {% else %}
-        <h2>Ваши посещения:</h2>
+        <h2>Посещения:</h2>
     {% endif %}
     {% if not posts %}
-        <p>У вас нет записей.</p>
+        <p>Нет записей.</p>
     {% else %}
         {% for post in posts %}
             {% include '_post.html' %}

@@ -1,12 +1,28 @@
 import base64
 import binascii
-
+import imghdr
+import os
 from flask import abort, flash, jsonify, redirect, render_template, request, send_from_directory, url_for
 from flask_login import current_user, login_required, login_user, logout_user
+from werkzeug.utils import secure_filename
 
 from app import app, db
 from app.forms import ChangePasswordForm, EditProfileForm, LoginForm
 from app.models import Avatar, User
+
+
+def validate_image(stream):
+    header = stream.read(512)
+    stream.seek(0)
+    format = imghdr.what(None, header)
+    if not format:
+        return None
+    return '.' + (format if format != 'jpeg' else 'jpg')
+
+
+@app.errorhandler(413)
+def too_large(e):
+    return "File is too large", 413
 
 
 @app.route('/avatar/<path:filename>')
@@ -28,27 +44,34 @@ def upload_avatar(user_id):
     if not user or not current_user.is_can_edit(user):
         return jsonify(status='Ok', result='Error')
 
-    image = None
-    if request.method == 'POST' and 'blob' in request.form:
-        image = request.form.get('blob')
-        if not image:
-            return jsonify(status='Ok', result='Error')
+    uploaded_file = request.files['file']
+    if uploaded_file != '':
+        filename = str(user.id) + '.png'
+        uploaded_file.save(os.path.join('app/' + app.config['AVATARS_PATH'], filename))
 
-    print(image[:23])
-    image = image[22:]
-    filename = f'{user_id}.png'
-    path = f'./app/{app.config["AVATARS_PATH"]}{filename}'
+        user.set_avatar(filename)
+        db.session.commit()
 
-    with open(path, 'wb') as f:
-        try:
-            f.write(base64.b64decode(image))
-        except binascii.Error:
-            return jsonify(status='Ok', result='Error')
+        return jsonify(status='Ok', result='Done')
 
-    user.set_avatar(filename)
-    db.session.commit()
+    return jsonify(status='Ok', result='Error')
 
-    return jsonify(status='Ok', result='Done')
+
+@app.route('/posts')
+@login_required
+def posts():
+    return render_template('posts.html', title='Записи')
+
+
+@app.route('/new_posts')
+@login_required
+def new_post():
+    # Проверка прав пользователя
+    if current_user.is_student():
+        abort(403)
+
+    return render_template('new_post.html', title='Новая запись')
+
 
 @app.route('/user/<int:user_id>')
 @login_required
@@ -59,7 +82,7 @@ def profile(user_id):
         abort(404)
 
     posts = user.get_posts(limit=5, order_by_time=True)
-    return render_template('user.html', title='User', user=user, posts=posts)
+    return render_template('user.html', title='Профиль', user=user, posts=posts)
 
 
 @app.route('/user/<int:user_id>/edit', methods=['GET', 'POST'])
@@ -95,7 +118,7 @@ def edit_profile(user_id):
 
     user.fill_form(profile_form)
 
-    return render_template('edit_profile.html', title='Edit profile', user=user,
+    return render_template('edit_profile.html', title='Редактирование профиля', user=user,
                            profile_form=profile_form, password_form=password_form)
 
 
@@ -112,8 +135,8 @@ def user_posts(user_id):
     next_url = url_for("user_posts", user_id=user.id, page=posts.next_num) if posts.has_next else None
     prev_url = url_for("user_posts", user_id=user.id, page=posts.prev_num) if posts.has_prev else None
 
-    return render_template('user_posts.html', title='Ваши посты', user=user, posts=posts.items, next_url=next_url,
-                           prev_url=prev_url)
+    return render_template('user_posts.html', title='Записи пользователя', user=user, posts=posts.items,
+                           next_url=next_url, prev_url=prev_url)
 
 
 @app.route('/login', methods=['GET', 'POST'])
