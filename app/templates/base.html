@@ -17,15 +17,16 @@
     {% endif %}
 
     <link rel="stylesheet" href="{{ url_for('.static', filename='css/bootstrap.css') }}">
+    <link rel="stylesheet" href="{{ url_for('.static', filename='css/custom.css') }}">
 
     {% block styles %}
     {% endblock %}
 
 </head>
-<body>
+<body class="body_base">
 {% block navbar %}
     <nav class="navbar bg-dark navbar-dark navbar-expand-md">
-        <a class="navbar-brand" href="{{ url_for("index") }}">Beholder</a>
+        <a class="navbar-brand mr-5" href="{{ url_for("index") }}">Beholder</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
                 aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -66,15 +67,15 @@
 
 {% with messages = get_flashed_messages() %}
     {% if messages %}
-        <ul>
+        <ul class="d-flex justify-content-center col-sm">
             {% for message in messages %}
-                <li>{{ message }}</li>
+                <li class="li_mes">{{ message }}</li>
             {% endfor %}
         </ul>
     {% endif %}
 {% endwith %}
 
-<div class="container mt-5">
+<div class="container-fluid mt-5">
     {% block content %}
     {% endblock %}
 </div>
