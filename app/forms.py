@@ -1,9 +1,6 @@
 from flask_wtf import FlaskForm
-from flask_wtf.file import FileField
-from wtforms import StringField, PasswordField, BooleanField, SubmitField
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, TextAreaField
 from wtforms.validators import DataRequired, Email, Length, EqualTo
-
-# from app import avatars
 
 
 class LoginForm(FlaskForm):
@@ -23,8 +20,6 @@ class EditProfileForm(FlaskForm):
     lastname = StringField('Фамилия')
     patronymic = StringField('Отчество')
 
-    # submit = SubmitField('Редактировать')
-
 
 class ChangePasswordForm(FlaskForm):
     form_name = 'ChangePasswordForm'
@@ -37,10 +32,9 @@ class ChangePasswordForm(FlaskForm):
                                           Length(min=5, message='Минимальная длина пароля %(min)d'),
                                           EqualTo('new_password', message='Пароль не совпадают')])
 
-    # submit = SubmitField('Изменить пароль')
 
+class CreatePostForm(FlaskForm):
+    room = StringField('Аудитория')
+    lesson = StringField('Пара')
+    notes = TextAreaField('Заметки')
 
-# class UploadImage(FlaskForm):
-#     file = FileField('Выберите изображения', validators=[
-#         DataRequired(message='Должно быть загружено хотябы одно изображение')])
-#     submit

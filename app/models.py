@@ -87,7 +87,7 @@ class User(UserMixin, db.Model):
             2 - Преподаватель;
             3 - Модератор.
         """
-        if self.user_type == 1:
+        if self.is_student():
             return 'Student'
         if self.user_type == 2:
             return 'Lecture'
@@ -105,7 +105,7 @@ class User(UserMixin, db.Model):
                 Если False, то вернётся сам объект запроса.
         """
 
-        if self.user_type == 1:
+        if self.is_student():
             student = self.get_student()
             posts = student.get_visits(limit, order_by_time, get_all)
             return posts
@@ -153,6 +153,12 @@ class User(UserMixin, db.Model):
             return app.config['DEFAULT_AVATAR']
         return avatar.filename
 
+    def get_avatar_path(self):
+        avatar = self.get_avatar()
+        if not avatar:
+            return None
+        return avatar.get_path()
+
     def delete_avatar(self):
         avatar = self.get_avatar()
         if avatar:
@@ -195,7 +201,9 @@ class User(UserMixin, db.Model):
 
     def is_can_edit(self, obj) -> bool:
         if isinstance(obj, User):
-            if self != obj or self.user_type != 3:
+            print(self.user_type)
+            if self != obj and self.user_type != 3:
+                print('Denied')
                 return False
             return True
 
@@ -211,6 +219,40 @@ class User(UserMixin, db.Model):
 
     def __repr__(self):
         return '<User {}>'.format(self.get_fullname())
+
+
+class Avatar(db.Model):
+    """
+    Модель аватара пользователя.
+    id: int - первичный ключ (при создании объекта назначается сам!).
+    user_id: int - id пользователя (назначается сам!).
+    filename: str - название файла. Обязательно при создании!
+    is_proved: int - фото проверенно модератором.
+
+    user - объект пользователя, которому принадлежит фото. Обязательно при создании!
+    """
+    id = db.Column(db.Integer, primary_key=True)
+
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    filename = db.Column(db.String(64), index=True, unique=True)
+    is_proved = db.Column(db.Integer)
+
+    def set(self, filename: str):
+        self.filename = filename
+        if self.user.is_student():
+            self.is_proved = 0
+        else:
+            self.is_proved = 1
+
+    def get_filename(self, ):
+        return self.filename
+
+    def get_path(self):
+        return '{}{}{}'.format('./app/', app.config["AVATARS_PATH"], self.filename)
+
+    def prove(self):
+        self.is_proved = 1
+        db.session.commit()
 
 
 class Post(db.Model):
@@ -235,6 +277,7 @@ class Post(db.Model):
     lesson = db.Column(db.String(140))
     notes = db.Column(db.Text())
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    is_done = db.Column(db.Integer)
 
     photos = db.relationship('Post_Photo', backref='post', lazy='dynamic')
     journals = db.relationship('Journal', backref='post', lazy='dynamic')
@@ -275,35 +318,7 @@ class Post_Photo(db.Model):
     id = db.Column(db.Integer, primary_key=True)
 
     post_id = db.Column(db.Integer, db.ForeignKey('post.id'))
-    filename = db.Column(db.String(64), index=True, unique=True)
-
-
-class Avatar(db.Model):
-    """
-    Модель аватара пользователя.
-    id: int - первичный ключ (при создании объекта назначается сам!).
-    user_id: int - id пользователя (назначается сам!).
-    filename: str - название файла. Обязательно при создании!
-    is_proved: int - фото проверенно модератором.
-
-    user - объект пользователя, которому принадлежит фото. Обязательно при создании!
-    """
-    id = db.Column(db.Integer, primary_key=True)
-
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    filename = db.Column(db.String(64), index=True, unique=True)
-    is_proved = db.Column(db.Integer)
-
-    def set(self, filename: str):
-        self.filename = filename
-        if self.user.is_student():
-            self.is_proved = 0
-        else:
-            self.is_proved = 1
-
-    def prove(self):
-        self.is_proved = 1
-        db.session.commit()
+    filename = db.Column(db.String(64))
 
 
 class Student(db.Model):
