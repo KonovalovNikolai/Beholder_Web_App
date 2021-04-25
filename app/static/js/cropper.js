@@ -42,3 +42,46 @@ function initCropper() {
         }
     });
 }
+
+$("#crop").click(function () {
+    $(this).attr('disabled', 'disabled');
+    if (cropper == '') {
+        alert('Загрузите фото');
+        return false;
+    }
+
+    canvas = cropper.getCroppedCanvas({
+        width: 250,
+        height: 250,
+    });
+
+    var url = $(this).attr('action');
+
+    canvas.toBlob(function (blob) {
+        var data = new FormData();
+
+        data.append("file", blob, "avatar.jpg");
+
+        $.ajax({
+            url: url,
+            type: 'POST',
+            cache: false,
+            data: data,
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                if (response["result"] == "Done") {
+                    alert('Фото загружено');
+                    document.location.reload();
+                } else {
+                    alert('Произошла ошибка');
+                    $("#crop").removeAttr('disabled');
+                }
+            },
+            error: function (response) {
+                console.log(response);
+                $("#crop").removeAttr('disabled');
+            }
+        })
+    })
+});
