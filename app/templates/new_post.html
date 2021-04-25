@@ -1,12 +1,60 @@
 {% extends "base.html" %}
 
 {% block styles %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.7.1/min/dropzone.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='js/hystModal-0.4/dist/hystmodal.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/loader.css') }}">
+{% endblock %}
+
+{% block modalWindow %}
+    <div class="hystmodal" id="myModal" aria-hidden="true">
+        <div class="hystmodal__wrap">
+            <div class="hystmodal__window" role="dialog" aria-modal="true">
+                <p>Загрузка...</p>
+                <div class="loader">Создание новой записи...</div>
+            </div>
+        </div>
+    </div>
 {% endblock %}
 
 {% block content %}
     <h1>Создание новой записи.</h1>
 
+    <div class="container">
+        <form upload_to="{{ url_for('upload_post_image') }}"
+              class="dropzone" action="{{ url_for('secure_post_image') }}">
+        </form>
+        <form method="POST" id="post-info">
+            {{ form.hidden_tag() }}
+            <p>
+                {{ form.room.label }}<br>
+                {{ form.room(size=20) }}
+            </p>
+            <p>
+                {{ form.lesson.label }}<br>
+                {{ form.lesson(size=20, id='lesson') }}
+            </p>
+            <p>
+                {{ form.notes.label }}<br>
+                {{ form.notes(cols=50, rows=4) }}
+            </p>
+        </form>
+        <button  id="create">Создать</button>
+    </div>
+
 {% endblock %}
 
 {% block scripts %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.7.1/min/dropzone.min.js"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/dropbox.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/hystModal-0.4/dist/hystmodal.min.js') }}"></script>
+    <script>
+        const myModal = new HystModal({
+            linkAttributeName: "data-hystmodal",
+            closeOnOverlay: false,
+            closeOnEsc: false,
+            closeOnButton: false
+            // настройки (не обязательно), см. API
+        });
+    </script>
 {% endblock %}

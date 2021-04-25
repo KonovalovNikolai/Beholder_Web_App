@@ -4,72 +4,59 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.4.1/cropper.min.css"
           integrity="sha512-Yq9lAK/eVwL0/wCk3u2f5qtGqqrbm7fXNTjhzqwk8vyLp2UmNt79cGPgWyxyUB//AmCNN1d6od+PA+D+btyWjQ=="
           crossorigin="anonymous"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='js/hystModal-0.4/dist/hystmodal.min.css') }}">
+{% endblock %}
+
+{% block modalWindow %}
+    <div class="hystmodal" id="myModal" aria-hidden="true">
+        <div class="hystmodal__wrap">
+            <div class="hystmodal__window" role="dialog" aria-modal="true">
+                <p>Изменить фото.</p>
+                <input type="file" id="cropperfile"/>
+                <div style="width:300px;height:400px;">
+                    <img src="" id="cropper-img"/>
+                </div>
+                <button id="crop" action="{{ url_for('upload_avatar', user_id=user.id) }}">Загрузить</button>
+            </div>
+        </div>
+    </div>
 {% endblock %}
 
 {% block content %}
     <h1>{{ user.get_fullname() }}: Редактирование профиля.</h1>
     <img src="{{ url_for('avatar', filename=user.get_avatar_name()) }}" alt="User avatar" id="avatar">
-
+    <br>
+    <button  id="new-avatr" data-hystmodal="#myModal">Изменить аватар.</button>
+    <br>
     <p>Личная информация.</p>
     <form action="" method="POST">
         {{ profile_form.hidden_tag() }}
-        <p>
-            {{ profile_form.email.label }}<br>
-            {{ profile_form.email(size=32) }}<br>
-            {% for error in profile_form.email.errors %}
-                <span style="color: red;">{{ error }}</span>
-            {% endfor %}
-        </p>
-        <p>
-            {{ profile_form.firstname.label }}<br>
-            {{ profile_form.firstname(size=32) }}<br>
-        </p>
-        <p>
-            {{ profile_form.lastname.label }}<br>
-            {{ profile_form.lastname(size=32) }}<br>
-        </p>
-        <p>
-            {{ profile_form.patronymic.label }}<br>
-            {{ profile_form.patronymic(size=32) }}<br>
-        </p>
+        {% for field in profile_form if field.name != "csrf_token"%}
+            <p>{{ field.lable }}</p>
+            <p>
+                {{ field }}
+                {% for error in field.errors %}
+                    <span style="color: red;">{{ error }}</span>
+                {% endfor %}
+            </p>
+        {% endfor %}
         <p><input type="submit" name="{{ profile_form.form_name }}" value="Редактировать"></p>
     </form>
 
     <p>Изменить пароль</p>
     <form action="" method="POST">
         {{ password_form.hidden_tag() }}
-        <p>
-            {{ password_form.old_password.label }}<br>
-            {{ password_form.old_password(size=32) }}<br>
-            {% for error in password_form.old_password.errors %}
-                <span style="color: red;">{{ error }}</span>
-            {% endfor %}
-        </p>
-        <p>
-            {{ password_form.new_password.label }}<br>
-            {{ password_form.new_password(size=32) }}<br>
-            {% for error in password_form.new_password.errors %}
-                <span style="color: red;">{{ error }}</span>
-            {% endfor %}
-        </p>
-        <p>
-            {{ password_form.repeated_password.label }}<br>
-            {{ password_form.repeated_password(size=32) }}<br>
-            {% for error in password_form.repeated_password.errors %}
-                <span style="color: red;">{{ error }}</span>
-            {% endfor %}
-        </p>
+        {% for field in password_form if field.name != "csrf_token"%}
+            <p>{{ field.lable }}</p>
+            <p>
+                {{ field }}
+                {% for error in field.errors %}
+                    <span style="color: red;">{{ error }}</span>
+                {% endfor %}
+            </p>
+        {% endfor %}
         <p><input type="submit" name="{{ password_form.form_name }}" value="Изменить пароль"></p>
     </form>
-
-    <p>Изменить фото.</p>
-    <div>
-        <input type="file" id="cropperfile"/>
-        <div style="width:600px;height:600px;">
-            <img src="" id="cropper-img"/>
-        </div>
-        <button id="crop">Загрузить</button>
-    </div>
 {% endblock %}
 
 {% block scripts %}
@@ -86,48 +73,11 @@
             integrity="sha512-QQWbg0x9wiAdLwLWfCmsGPq/KvjlrmVWzoB9bLT/JMYmr2kLRCLCvDkhhVWsdI3cjJQ2tFBPQVlGG/cgcC1DAA=="
             crossorigin="anonymous"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/cropper.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/hystModal-0.4/dist/hystmodal.min.js') }}"></script>
     <script>
-    $("#crop").click(function(){
-        $(this).attr('disabled','disabled');
-        if (cropper == '') {
-            alert('Загрузить фото');
-            return false;
-        }
-
-        canvas = cropper.getCroppedCanvas({
-          width: 250,
-          height: 250,
+        const myModal = new HystModal({
+            linkAttributeName: "data-hystmodal",
+            closeOnButton: false
         });
-
-        canvas.toBlob(function(blob) {
-            var url = '{{ url_for('upload_avatar', user_id=user.id) }}';
-            var data = new FormData();
-
-            data.append("file", blob, "avatar.jpg");
-
-            $.ajax({
-                url: url,
-                type: 'POST',
-                cache: false,
-                data: data,
-                processData: false,
-                contentType: false,
-                success: function(response) {
-                    if(response["result"] == "Done"){
-                        alert('Фото загружено');
-                        document.location.reload();
-                    }
-                    else{
-                        alert('Произошла ошибка');
-                        $("#crop").removeAttr('disabled');
-                    }
-                },
-                error: function(response) {
-                    console.log(response);
-                    $("#crop").removeAttr('disabled');
-                }
-            })
-        })
-    });
     </script>
 {% endblock %}

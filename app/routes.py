@@ -1,14 +1,15 @@
 import base64
 import binascii
 import imghdr
+import uuid
 import os
 from flask import abort, flash, jsonify, redirect, render_template, request, send_from_directory, url_for
 from flask_login import current_user, login_required, login_user, logout_user
 from werkzeug.utils import secure_filename
 
-from app import app, db
-from app.forms import ChangePasswordForm, EditProfileForm, LoginForm
-from app.models import Avatar, User
+from app import app, db, recognition
+from app.forms import ChangePasswordForm, EditProfileForm, LoginForm, CreatePostForm
+from app.models import Avatar, User, Post, Post_Photo
 
 
 def validate_image(stream):
@@ -28,6 +29,48 @@ def too_large(e):
 @app.route('/avatar/<path:filename>')
 def avatar(filename):
     return send_from_directory(app.config["AVATARS_PATH"], filename, as_attachment=True)
+
+
+@app.route('/api/secure_image', methods=['POST'])
+def secure_post_image():
+    if current_user.is_anonymous and current_user.is_student():
+        return "Доступ запрещён", 403
+
+    uploaded_file = request.files['file']
+    filename = secure_filename(uploaded_file.filename)
+    if filename != '':
+        file_ext = os.path.splitext(filename)[1]
+        if file_ext not in app.config['UPLOAD_EXTENSIONS'] or \
+                file_ext != validate_image(uploaded_file.stream):
+            return "Invalid image", 400
+    return '', 204
+
+
+@app.route('/api/upload_image', methods=['POST'])
+def upload_post_image():
+    if current_user.is_anonymous and current_user.is_student():
+        return "Доступ запрещён", 403
+
+    form = CreatePostForm()
+
+    post = Post(author=current_user, lesson=form.lesson.data, room=form.room.data, notes=form.notes.data, is_done=0)
+    db.session.add(post)
+
+    for key, f in request.files.items():
+        if key.startswith('file'):
+            filename = secure_filename(f.filename)
+            if filename != '':
+                file_ext = os.path.splitext(filename)[1]
+                if file_ext not in app.config['UPLOAD_EXTENSIONS'] or file_ext != validate_image(f.stream):
+                    continue
+                filename = '{}_{}{}'.format(current_user.id, str(uuid.uuid4()), file_ext)
+                photo = Post_Photo(post=post, filename=filename)
+                f.save(os.path.join('app/static/' + app.config['POST_IMG_PATH'], photo.filename))
+                db.session.add(photo)
+
+    db.session.commit()
+
+    return jsonify(result='done'), 201
 
 
 @app.route('/api/upload_avatar/<int:user_id>', methods=['POST'])
@@ -62,8 +105,12 @@ def approve_avatar():
 
     avatar_id = request.form.get('id')
     avatar = Avatar.query.get(avatar_id)
-
     if not avatar:
+        return jsonify(status='Ok', result='Error')
+
+    res = recognition.create_new_vector(avatar)
+
+    if not res:
         return jsonify(status='Ok', result='Error')
 
     avatar.is_proved = 1
@@ -83,6 +130,12 @@ def posts():
     return render_template('posts.html', title='Записи')
 
 
+@app.route('/posts/<int:post_id>')
+@login_required
+def post(post_id):
+    return render_template('posts.html', title='Записи')
+
+
 @app.route('/new_posts')
 @login_required
 def new_post():
@@ -90,7 +143,9 @@ def new_post():
     if current_user.is_student():
         abort(403)
 
-    return render_template('new_post.html', title='Новая запись')
+    form = CreatePostForm()
+
+    return render_template('new_post.html', title='Новая запись', form=form)
 
 
 @app.route('/user/<int:user_id>')
