@@ -9,7 +9,8 @@ from werkzeug.utils import secure_filename
 
 from app import app, db, recognition
 from app.forms import ChangePasswordForm, EditProfileForm, LoginForm, CreatePostForm
-from app.models import Avatar, User, Post, Post_Photo
+from app.models import Avatar, User, Post, Image
+from  app.tasks import recognize_task
 
 
 def validate_image(stream):
@@ -64,13 +65,23 @@ def upload_post_image():
                 if file_ext not in app.config['UPLOAD_EXTENSIONS'] or file_ext != validate_image(f.stream):
                     continue
                 filename = '{}_{}{}'.format(current_user.id, str(uuid.uuid4()), file_ext)
-                photo = Post_Photo(post=post, filename=filename)
+                photo = Image(post=post, filename=filename)
                 f.save(os.path.join('app/static/' + app.config['POST_IMG_PATH'], photo.filename))
                 db.session.add(photo)
 
     db.session.commit()
 
-    return jsonify(result='done'), 201
+    task = recognize_task.delay(post_id=post.id)
+    print(task.id)
+    return jsonify(url=url_for('recognition_status', task_id=task.id)), 201
+
+
+@app.route('/api/task/<task_id>', methods=['GET'])
+def recognition_status(task_id):
+    task = recognize_task.AsyncResult(task_id)
+    if task.ready():
+        return jsonify(done=True, url=url_for('index')), 201
+    return jsonify(done=False), 201
 
 
 @app.route('/api/upload_avatar/<int:user_id>', methods=['POST'])

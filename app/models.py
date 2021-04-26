@@ -110,7 +110,7 @@ class User(UserMixin, db.Model):
             posts = student.get_visits(limit, order_by_time, get_all)
             return posts
 
-        posts = self.posts
+        posts = self.posts.filter(Post.is_done.isnot(0))
         if order_by_time:
             posts = posts.order_by(db.desc(Post.timestamp))
         if limit:
@@ -279,8 +279,14 @@ class Post(db.Model):
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     is_done = db.Column(db.Integer)
 
-    photos = db.relationship('Post_Photo', backref='post', lazy='dynamic')
+    photos = db.relationship('Image', backref='post', lazy='dynamic')
     journals = db.relationship('Journal', backref='post', lazy='dynamic')
+    unknown_visitors = db.relationship('Unknown_Visitor', backref='post', lazy='dynamic')
+
+    def get_images(self, get_all=True):
+        if get_all:
+            return self.photos.all()
+        return self.photos
 
 
 class Journal(db.Model):
@@ -302,11 +308,11 @@ class Journal(db.Model):
     student_id = db.Column(db.Integer, db.ForeignKey('student.id'))
     post_id = db.Column(db.Integer, db.ForeignKey('post.id'))
     distance = db.Column(db.Integer)
-    lecturer_proved = db.Column(db.Integer)
-    student_proved = db.Column(db.Integer)
+    lecturer_proved = db.Column(db.Integer, default=0)
+    student_proved = db.Column(db.Integer, default=0)
 
 
-class Post_Photo(db.Model):
+class Image(db.Model):
     """
     Модель фотографий из записей.
     id: int - первичный ключ (при создании объекта назначается сам!).
@@ -319,6 +325,24 @@ class Post_Photo(db.Model):
 
     post_id = db.Column(db.Integer, db.ForeignKey('post.id'))
     filename = db.Column(db.String(64))
+
+    unknown_visitors = db.relationship('Unknown_Visitor', backref='image', lazy='dynamic')
+
+    def get_path(self):
+        return './app/static/{}{}'.format(app.config['POST_IMG_PATH'], self.filename)
+
+
+class Unknown_Visitor(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+
+    post_id = db.Column(db.Integer, db.ForeignKey('post.id'))
+    photo_id = db.Column(db.Integer, db.ForeignKey('image.id'))
+
+    name = db.Column(db.String(140))
+    top = db.Column(db.Integer)
+    right = db.Column(db.Integer)
+    bottom = db.Column(db.Integer)
+    left = db.Column(db.Integer)
 
 
 class Student(db.Model):

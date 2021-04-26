@@ -9,6 +9,9 @@ class Config(object):
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SEND_FILE_MAX_AGE_DEFAULT = 0
 
+    CELERY_BROKER_URL = 'redis://localhost:6379/0'
+    CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+
     AVATARS_PATH = 'img/avatars/'
     DEFAULT_AVATAR = 'default.png'
     POST_IMG_PATH = 'img/post_img/'

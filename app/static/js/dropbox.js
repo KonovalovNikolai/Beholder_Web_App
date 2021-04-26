@@ -36,6 +36,22 @@ var myDropzone = new Dropzone(".dropzone", {
 
         this.on('successmultiple', function (file, response){
             console.log(response);
+            var url = response['url'];
+            var intervalID = setInterval(function (){
+                $.ajax({
+                     url: url,
+                     type: 'GET',
+                     dataType: 'json',
+                     cache: false,
+                    success: function (response){
+                        if(response['done']){
+                            url = response['url'];
+                            clearInterval(intervalID);
+                            window.location.href = url;
+                        }
+                    }
+                });
+            }, 1000);
         });
     }
 });
