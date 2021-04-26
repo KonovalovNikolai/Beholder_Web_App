@@ -10,7 +10,7 @@ class LoginForm(FlaskForm):
     password = PasswordField('Пароль', validators=[DataRequired(message='Поле должно быть заполнено')])
     remember_me = BooleanField('Запомнить меня')
 
-    submit = SubmitField('Войти')
+    submit = SubmitField('ВОЙТИ')
 
 
 class EditProfileForm(FlaskForm):
