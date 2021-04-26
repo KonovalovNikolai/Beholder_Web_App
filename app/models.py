@@ -328,8 +328,11 @@ class Image(db.Model):
 
     unknown_visitors = db.relationship('Unknown_Visitor', backref='image', lazy='dynamic')
 
-    def get_path(self):
-        return './app/static/{}{}'.format(app.config['POST_IMG_PATH'], self.filename)
+    def get_path(self, to_static=False):
+        path = ''
+        if not to_static:
+            path = './app/static/'
+        return '{}{}{}'.format(path, app.config['POST_IMG_PATH'], self.filename)
 
 
 class Unknown_Visitor(db.Model):

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block styles %}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/bxslider/4.2.12/jquery.bxslider.css">
+{% endblock %}
+
+{% block content %}
+    <a href="{{ url_for('profile', user_id=post.author.id) }}">
+        <img src="{{ url_for('avatar', filename=post.author.get_avatar_name()) }}" alt="User avatar">
+    </a>
+    <p>{{ post.author.get_fullname() }}</p>
+
+    <div class="bxslider">
+        {% for image in post.get_images() %}
+            <div><img src="{{ url_for('static', filename=image.get_path(to_static=True)) }}"></div>
+        {% endfor %}
+    </div>
+
+
+{% endblock %}
+
+{% block scripts %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"
+            integrity="sha512-+NqPlbbtM1QqiK8ZAo4Yrj2c4lNQoGv8P79DPtKzj++l5jnN39rHA/xsqn8zE9l0uSoxaCdrOgFs6yjyfbBxSg=="
+            crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/bxslider/4.2.12/jquery.bxslider.min.js"></script>
+    <script>
+        $(function(){
+            $('.bxslider').bxSlider({
+                mode: 'fade',
+                responsive: true,
+                slideWidth: 400
+            });
+        });
+    </script>
+{% endblock %}

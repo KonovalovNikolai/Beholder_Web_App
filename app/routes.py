@@ -72,15 +72,18 @@ def upload_post_image():
     db.session.commit()
 
     task = recognize_task.delay(post_id=post.id)
-    print(task.id)
     return jsonify(url=url_for('recognition_status', task_id=task.id)), 201
 
 
 @app.route('/api/task/<task_id>', methods=['GET'])
 def recognition_status(task_id):
+    if current_user.is_anonymous and current_user.is_student():
+        return "Доступ запрещён", 403
+
     task = recognize_task.AsyncResult(task_id)
     if task.ready():
-        return jsonify(done=True, url=url_for('index')), 201
+        post_id = task.get()
+        return jsonify(done=True, url=url_for('post'), post_id=post_id), 201
     return jsonify(done=False), 201
 
 
@@ -144,7 +147,12 @@ def posts():
 @app.route('/posts/<int:post_id>')
 @login_required
 def post(post_id):
-    return render_template('posts.html', title='Записи')
+    post = Post.query.get(post_id)
+
+    if not post:
+        abort(404)
+
+    return render_template('post.html', title='Запись', post=post)
 
 
 @app.route('/new_posts')
