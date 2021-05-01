@@ -201,11 +201,14 @@ class User(UserMixin, db.Model):
 
     def is_can_edit(self, obj) -> bool:
         if isinstance(obj, User):
-            print(self.user_type)
-            if self != obj and self.user_type != 3:
-                print('Denied')
+            if self != obj and not self.is_moderator():
                 return False
             return True
+
+        if isinstance(obj, Post):
+            if self.is_moderator() or obj.author == self:
+                return True
+            return False
 
     def _make_student(self):
         """
@@ -279,14 +282,22 @@ class Post(db.Model):
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     is_done = db.Column(db.Integer)
 
-    photos = db.relationship('Image', backref='post', lazy='dynamic')
+    images = db.relationship('Image', backref='post', lazy='dynamic')
     journals = db.relationship('Journal', backref='post', lazy='dynamic')
-    unknown_visitors = db.relationship('Unknown_Visitor', backref='post', lazy='dynamic')
 
     def get_images(self, get_all=True):
         if get_all:
-            return self.photos.all()
-        return self.photos
+            return self.images.all()
+        return self.images
+
+    def get_first_image(self):
+        return self.images.first()
+
+    def get_visitors(self):
+        return self.journals.all()
+
+    def get_unknown_visitors(self):
+        return self.unknown_visitors.all()
 
 
 class Journal(db.Model):
@@ -311,6 +322,11 @@ class Journal(db.Model):
     lecturer_proved = db.Column(db.Integer, default=0)
     student_proved = db.Column(db.Integer, default=0)
 
+    def get_distance(self, digits=3):
+        if not self.distance:
+            return '-'
+        return f'{self.distance:.{digits}f}'
+
 
 class Image(db.Model):
     """
@@ -326,26 +342,11 @@ class Image(db.Model):
     post_id = db.Column(db.Integer, db.ForeignKey('post.id'))
     filename = db.Column(db.String(64))
 
-    unknown_visitors = db.relationship('Unknown_Visitor', backref='image', lazy='dynamic')
-
     def get_path(self, to_static=False):
         path = ''
         if not to_static:
             path = './app/static/'
         return '{}{}{}'.format(path, app.config['POST_IMG_PATH'], self.filename)
-
-
-class Unknown_Visitor(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-
-    post_id = db.Column(db.Integer, db.ForeignKey('post.id'))
-    photo_id = db.Column(db.Integer, db.ForeignKey('image.id'))
-
-    name = db.Column(db.String(140))
-    top = db.Column(db.Integer)
-    right = db.Column(db.Integer)
-    bottom = db.Column(db.Integer)
-    left = db.Column(db.Integer)
 
 
 class Student(db.Model):

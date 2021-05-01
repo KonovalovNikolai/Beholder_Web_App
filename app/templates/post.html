@@ -2,20 +2,58 @@
 
 {% block styles %}
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/bxslider/4.2.12/jquery.bxslider.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/details_table.css') }}">
 {% endblock %}
 
 {% block content %}
-    <a href="{{ url_for('profile', user_id=post.author.id) }}">
-        <img src="{{ url_for('avatar', filename=post.author.get_avatar_name()) }}" alt="User avatar">
-    </a>
-    <p>{{ post.author.get_fullname() }}</p>
-
+    {% include '_post_header.html' %}
+    <div>
+        <h2>Аудитория: {{ post.room }},</h2>
+        <h2>Занятие: {{ post.lesson }}.</h2>
+        <h2>Заметка: {{ post.notes }}</h2>
+    </div>
     <div class="bxslider">
         {% for image in post.get_images() %}
-            <div><img src="{{ url_for('static', filename=image.get_path(to_static=True)) }}"></div>
+            <div>
+                <img src="{{ url_for('static', filename=image.get_path(to_static=True)) }}" id="photo-{{ image.id }}">
+            </div>
         {% endfor %}
     </div>
+    <details open="">
+        <summary>Отмеченные студенты</summary>
+        <table>
+            <thead>
+                <tr align="center">
+                    <th>Фото</th>
+                    <th>ФИО</th>
+                    <th>Точность</th>
+                    <th>Подтверждён</th>
+                </tr>
+            </thead>
+            {% for visitor in post.get_visitors() %}
+                <tr align="center" user_id="visitor.">
+                    <td><img src="{{ url_for('avatar', filename=visitor.student.user.get_avatar_name()) }}" width="50"></td>
+                    <td>{{ visitor.student.user.get_fullname() }}</td>
+                    <td>{{ visitor.get_distance() }}</td>
+                    {% if visitor.lecturer_proved == 0 %}
+                        <td>&#9746;</td>
+                        {% if current_user.is_can_edit(post) %}
+                            <td><button>Подтвердить</button></td>
+                        {% endif %}
+                    {% else %}
+                        <td>&#9745;</td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+        </table>
+    </details>
 
+    <details>
+        <summary>Просят отметить</summary>
+        <table></table>
+    </details>
+
+    <p>Экспортировать запись в Exel</p>
 
 {% endblock %}
 

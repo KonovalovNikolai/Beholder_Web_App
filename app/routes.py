@@ -1,5 +1,3 @@
-import base64
-import binascii
 import imghdr
 import uuid
 import os
@@ -141,16 +139,14 @@ def index():
 @app.route('/posts')
 @login_required
 def posts():
-    return render_template('posts.html', title='Записи')
+    posts = Post.query.filter(Post.is_done.isnot(0)).order_by(db.desc(Post.timestamp)).all()
+    return render_template('posts.html', title='Записи', posts=posts)
 
 
-@app.route('/posts/<int:post_id>')
+@app.route('/post/<int:post_id>')
 @login_required
 def post(post_id):
-    post = Post.query.get(post_id)
-
-    if not post:
-        abort(404)
+    post = Post.query.get_or_404(post_id)
 
     return render_template('post.html', title='Запись', post=post)
 
@@ -170,10 +166,7 @@ def new_post():
 @app.route('/user/<int:user_id>')
 @login_required
 def profile(user_id):
-    user = User.query.get(user_id)
-
-    if not user:
-        abort(404)
+    user = User.query.get_or_404(user_id)
 
     posts = user.get_posts(limit=5, order_by_time=True)
     return render_template('user.html', title='Профиль', user=user, posts=posts)
@@ -182,10 +175,7 @@ def profile(user_id):
 @app.route('/user/<int:user_id>/edit', methods=['GET', 'POST'])
 @login_required
 def edit_profile(user_id):
-    user = User.query.get(user_id)
-
-    if not user:
-        abort(404)
+    user = User.query.get_or_404(user_id)
 
     # Проверка прав пользователя
     if not current_user.is_can_edit(user):
@@ -219,10 +209,7 @@ def edit_profile(user_id):
 @app.route('/user/<int:user_id>/posts')
 @login_required
 def user_posts(user_id):
-    user = User.query.get(user_id)
-
-    if not user:
-        abort(404)
+    user = User.query.get_or_404(user_id)
 
     page = request.args.get('page', 1, type=int)
     posts = user.get_posts(get_all=False).paginate(page, 10, True)

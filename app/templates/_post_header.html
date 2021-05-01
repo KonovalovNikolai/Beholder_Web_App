@@ -1,0 +1,13 @@
+<header>
+    <span>
+        <a href="{{ url_for('profile', user_id=post.author.id) }}">
+            <img src="{{ url_for('avatar', filename=post.author.get_avatar_name()) }}" width="50">
+        </a>
+    </span>
+    <span>
+        <a href="{{ url_for('profile', user_id=post.author.id) }}">
+            {{ post.author.get_fullname() }}
+        </a>
+    </span>
+    <span>{{ post.timestamp }}</span>
+</header>

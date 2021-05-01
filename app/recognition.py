@@ -1,7 +1,7 @@
 from threading import Lock
 import face_recognition
 
-from app.models import Student, User, Avatar, Post, Journal, Unknown_Visitor
+from app.models import Student, User, Avatar, Post, Journal
 from app import db
 
 
@@ -41,13 +41,13 @@ class FaceRecognition:
         images = post.get_images()
         images_path = [image.get_path() for image in images]
 
-        for image, image_path in zip(images, images_path):
+        for image_path in images_path:
             loaded_image = face_recognition.load_image_file(image_path)
 
-            face_locations = face_recognition.face_locations(loaded_image)
-            face_encodings = face_recognition.face_encodings(loaded_image, face_locations)
+            # face_locations = face_recognition.face_locations(loaded_image)
+            face_encodings = face_recognition.face_encodings(loaded_image)
 
-            for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
+            for face_encoding in face_encodings:
                 face_distance = face_recognition.face_distance(self.known_faces_encodings, face_encoding)
                 matches = list(face_distance <= 0.65)
 
@@ -61,9 +61,6 @@ class FaceRecognition:
                     db.session.add(journal)
 
                     continue
-
-                visitor = Unknown_Visitor(post=post, image=image, top=top, right=right, bottom=bottom, left=left)
-                db.session.add(visitor)
 
         post.is_done = 1
         db.session.commit()
