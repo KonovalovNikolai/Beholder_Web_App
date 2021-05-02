@@ -4,8 +4,9 @@
 
 .border_content {
     border-radius: 25px !important;
-    border: 1px solid #708681 !important;
+    border: 2px solid #708681 !important;
     background-color: #F8F8F8;
+    outline-offset: 0px;
 
 }
 
@@ -48,10 +49,11 @@
 }
 
 .content {
-    padding-left: 140px;
-    padding-right: 140px;
-    margin-left: auto;
-    margin-right: auto;
+    margin-left: 110px;
+    margin-right: 110px;
+    padding-left: 30px;
+    padding-right: 30px;
+    padding-top: 20px;
 }
 
 .about_user {
@@ -61,5 +63,44 @@
 
 .au_text {
     font-size: 18px;
+
+}
+
+.holder {
+    position: relative;
+    border-radius: 25px !important;
+}
+
+.block {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    top: 0;
+    background: rgba(255, 255, 255, 0.5);
+    display: none;
+    border-radius: 25px !important;
+}
+
+.holder:hover .block {
+    display: block;
+}
+
+.block a{
+    display: block;
+    height: 100%;
+
+}
+
+.block img {
+    margin-left: 4%;
+    margin-top: 84%;
+}
+
+.border_img {
+    border-radius: 25px !important;
+    border: 2px solid #708681 !important;
+    background-color: #708681;
+
 
 }
