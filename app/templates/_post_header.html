@@ -1,4 +1,4 @@
-<header>
+<header id="post-header">
     <span>
         <a href="{{ url_for('profile', user_id=post.author.id) }}">
             <img src="{{ url_for('avatar', filename=post.author.get_avatar_name()) }}" width="50">

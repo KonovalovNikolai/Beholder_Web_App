@@ -7,7 +7,7 @@ from werkzeug.utils import secure_filename
 
 from app import app, db, recognition
 from app.forms import ChangePasswordForm, EditProfileForm, LoginForm, CreatePostForm
-from app.models import Avatar, User, Post, Image
+from app.models import Avatar, User, Post, Image, Request
 from  app.tasks import recognize_task
 
 
@@ -103,7 +103,7 @@ def upload_avatar(user_id):
         user.set_avatar(filename)
         db.session.commit()
 
-        return jsonify(result='Done')
+        return jsonify(result='Done'), 202
 
     return "Что-то пошло не так", 400
 
@@ -129,7 +129,45 @@ def approve_avatar():
     avatar.is_proved = 1
     db.session.commit()
 
-    return jsonify(status='Ok', result='Done'), 201
+    return jsonify(result='Done'), 201
+
+
+@app.route('/api/send_request/<int:post_id>', methods=['POST'])
+def take_request(post_id):
+    if current_user.is_anonymous or not current_user.is_student():
+        return "Доступ запрещён", 403
+
+    post = Post.query.get(post_id)
+    if not post:
+        return "Что-то пошло не так", 400
+
+    if post.check_student(current_user.get_student().id):
+        return "Запрос уже был отправлен", 406
+
+    request = Request(user=current_user, post=post)
+    db.session.add(request)
+    db.session.commit()
+
+    return jsonify(result='Done'), 202
+
+
+@app.route('/api/cancel_request/<int:post_id>', methods=['POST'])
+def cancel_request(post_id):
+    if current_user.is_anonymous:
+        return "Доступ запрещён", 403
+
+    if 'id' not in request.form:
+        return "Ошибка", 400
+
+    user_id = request.form.get('id', type=int)
+    if current_user.is_student():
+        if current_user.id != user_id:
+            return "Ошибка", 400
+
+    Request.query.filter(Request.post_id == post_id, Request.user_id == user_id).delete()
+    db.session.commit()
+
+    return jsonify(result='Done'), 202
 
 
 @app.route('/')
@@ -152,7 +190,7 @@ def post(post_id):
     return render_template('post.html', title='Запись', post=post)
 
 
-@app.route('/new_posts')
+@app.route('/new_post')
 @login_required
 def new_post():
     if current_user.is_student():

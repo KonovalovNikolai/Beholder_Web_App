@@ -46,6 +46,7 @@ class User(UserMixin, db.Model):
     student = db.relationship('Student', backref=db.backref('user', uselist=False))
     avatar = db.relationship('Avatar', backref=db.backref('user', uselist=False))
     posts = db.relationship('Post', backref='author', lazy='dynamic')
+    requests = db.relationship('Request', backref='user', lazy='dynamic')
 
     def set_password(self, password: str):
         """
@@ -119,6 +120,12 @@ class User(UserMixin, db.Model):
         if get_all:
             posts = posts.all()
         return posts
+
+    def check_request(self, post_id: int):
+        res = self.requests.filter(Request.post_id == post_id).all()
+        if res:
+            return True
+        return False
 
     def get_avatar(self):
         """
@@ -289,6 +296,7 @@ class Post(db.Model):
 
     images = db.relationship('Image', backref='post', lazy='dynamic')
     journals = db.relationship('Journal', backref='post', lazy='dynamic')
+    requests = db.relationship('Request', backref='post', lazy='dynamic')
 
     def get_images(self, get_all=True):
         if get_all:
@@ -306,9 +314,11 @@ class Post(db.Model):
     def get_visitors(self):
         return self.journals.all()
 
-    def get_unknown_visitors(self):
-        return self.unknown_visitors.all()
-
+    def check_student(self, student_id: int):
+        res = self.journals.filter(Journal.student_id == student_id).all()
+        if res:
+            return True
+        return False
 
 class Journal(db.Model):
     """
@@ -336,6 +346,14 @@ class Journal(db.Model):
         if not self.distance:
             return '-'
         return f'{self.distance:.{digits}f}'
+
+
+class Request(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    post_id = db.Column(db.Integer, db.ForeignKey('post.id'))
 
 
 class Image(db.Model):

@@ -12,33 +12,55 @@
         <h2>Занятие: {{ post.lesson }}.</h2>
         <h2>Заметка: {{ post.notes }}</h2>
     </div>
-    <div class="bxslider">
-        {% for image in post.get_images() %}
+
+    {% if current_user.is_student() %}
+        {% if post.check_student(current_user.id) %}
+            {# Студент был отмечен - зелённое окно #}
             <div>
-                <img src="{{ url_for('static', filename=image.get_path(to_static=True)) }}" id="photo-{{ image.id }}">
+                <h2>Вас отметили.</h2>
             </div>
-        {% endfor %}
-    </div>
+        {% elif current_user.check_request(post.id) %}
+            {# Студент уже отправил запрос - серое окно #}
+            <div>
+                <h2>Вы уже отправили запрос.</h2>
+                <button id="cancel-request" class="request-button" data-id="{{ current_user.id }}" data-url="{{ url_for('cancel_request', post_id=post.id) }}">
+                    Отменить
+                </button>
+            </div>
+        {% else %}
+            {# Студент не был отмечен - красное окно #}
+            <div>
+                <h2>Вы не были отмечены.</h2>
+                <button id="send-request" class="request-button" data-id="{{ current_user.id }}" data-url="{{ url_for('take_request', post_id=post.id) }}">
+                    Попросить отметить
+                </button>
+            </div>
+        {% endif %}
+    {% endif %}
+
     <details open="">
         <summary>Отмеченные студенты</summary>
         <table>
             <thead>
-                <tr align="center">
-                    <th>Фото</th>
-                    <th>ФИО</th>
-                    <th>Точность</th>
-                    <th>Подтверждён</th>
-                </tr>
+            <tr align="center">
+                <th>Фото</th>
+                <th>ФИО</th>
+                <th>Точность</th>
+                <th>Подтверждён</th>
+            </tr>
             </thead>
             {% for visitor in post.get_visitors() %}
                 <tr align="center" user_id="visitor.">
-                    <td><img src="{{ url_for('avatar', filename=visitor.student.user.get_avatar_name()) }}" width="50"></td>
+                    <td><img src="{{ url_for('avatar', filename=visitor.student.user.get_avatar_name()) }}" width="50">
+                    </td>
                     <td>{{ visitor.student.user.get_fullname() }}</td>
                     <td>{{ visitor.get_distance() }}</td>
                     {% if visitor.lecturer_proved == 0 %}
                         <td>&#9746;</td>
                         {% if current_user.is_can_edit(post) %}
-                            <td><button>Подтвердить</button></td>
+                            <td>
+                                <button>Подтвердить</button>
+                            </td>
                         {% endif %}
                     {% else %}
                         <td>&#9745;</td>
@@ -58,14 +80,31 @@
 {% endblock %}
 
 {% block scripts %}
-    <script src="https://cdn.jsdelivr.net/bxslider/4.2.12/jquery.bxslider.min.js"></script>
     <script>
-        $(function(){
-            $('.bxslider').bxSlider({
-                mode: 'fade',
-                responsive: true,
-                slideWidth: 400
+        if ($('.request-button').length !== 0) {
+            $('.request-button').click(function () {
+                $(this).attr('disabled', 'disabled');
+
+                var url = $(this).data('url');
+
+                var data = new FormData();
+                data.append('id', $(this).data('id'));
+
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    cache: false,
+                    data: data,
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        document.location.reload();
+                    },
+                    error: function (response) {
+                        alert('Что-то пошло не так.\nПопробуйте ещё раз позже.');
+                    }
+                });
             });
-        });
+        }
     </script>
 {% endblock %}

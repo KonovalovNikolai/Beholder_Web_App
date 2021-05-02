@@ -101,7 +101,6 @@ class FaceRecognition:
     def __search(self, face_to_compare):
         for i, known_faces_encoding in enumerate(self.known_faces_encodings):
             distance = np.linalg.norm(known_faces_encoding - face_to_compare)
-            print(distance)
             if distance <= 0.6:
                 return i, distance
         return None
