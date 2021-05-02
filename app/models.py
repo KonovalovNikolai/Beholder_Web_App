@@ -1,4 +1,5 @@
 from datetime import datetime
+import arrow
 import numpy as np
 import json
 
@@ -88,8 +89,8 @@ class User(UserMixin, db.Model):
             3 - Модератор.
         """
         if self.is_student():
-            return 'Student'
-        if self.user_type == 2:
+            return 'Студент'
+        if self.is_lecture():
             return 'Lecture'
         return 'Moderator'
 
@@ -170,15 +171,19 @@ class User(UserMixin, db.Model):
         Если пользователь не студент - возвращает None.
         Если также сама создаст объект, если он не был создан раньше.
         """
-        if self.user_type != 1:
+        if not self.is_student():
             return None
         if not self.student:
             self._make_student()
         return self.student[0]
 
     def is_student(self):
-        student = self.get_student()
-        if student:
+        if self.user_type == 1:
+            return True
+        return False
+
+    def is_lecture(self):
+        if self.user_type == 2:
             return True
         return False
 
@@ -289,6 +294,11 @@ class Post(db.Model):
         if get_all:
             return self.images.all()
         return self.images
+
+    def get_humanized_time(self):
+        time = arrow.get(self.timestamp)
+        print(time.format())
+        return time.humanize(locale='ru')
 
     def get_first_image(self):
         return self.images.first()

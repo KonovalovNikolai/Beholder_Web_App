@@ -51,7 +51,7 @@ var myDropzone = new Dropzone(".dropzone", {
                         }
                     }
                 });
-            }, 1000);
+            }, 2000);
         });
     }
 });

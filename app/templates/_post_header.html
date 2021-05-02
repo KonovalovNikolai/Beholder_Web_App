@@ -9,5 +9,5 @@
             {{ post.author.get_fullname() }}
         </a>
     </span>
-    <span>{{ post.timestamp }}</span>
+    <span>{{ post.get_humanized_time() }}</span>
 </header>

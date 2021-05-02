@@ -41,7 +41,7 @@ def secure_post_image():
         file_ext = os.path.splitext(filename)[1]
         if file_ext not in app.config['UPLOAD_EXTENSIONS'] or \
                 file_ext != validate_image(uploaded_file.stream):
-            return "Invalid image", 400
+            return "Некорректный формат изображения", 400
     return '', 204
 
 
@@ -63,9 +63,9 @@ def upload_post_image():
                 if file_ext not in app.config['UPLOAD_EXTENSIONS'] or file_ext != validate_image(f.stream):
                     continue
                 filename = '{}_{}{}'.format(current_user.id, str(uuid.uuid4()), file_ext)
-                photo = Image(post=post, filename=filename)
-                f.save(os.path.join('app/static/' + app.config['POST_IMG_PATH'], photo.filename))
-                db.session.add(photo)
+                image = Image(post=post, filename=filename)
+                f.save(os.path.join('app/static/' + app.config['POST_IMG_PATH'], image.filename))
+                db.session.add(image)
 
     db.session.commit()
 
@@ -81,18 +81,19 @@ def recognition_status(task_id):
     task = recognize_task.AsyncResult(task_id)
     if task.ready():
         post_id = task.get()
-        return jsonify(done=True, url=url_for('post'), post_id=post_id), 201
+        print(post_id)
+        return jsonify(done=True, url=url_for('post', post_id=post_id)), 201
     return jsonify(done=False), 201
 
 
 @app.route('/api/upload_avatar/<int:user_id>', methods=['POST'])
 def upload_avatar(user_id):
     if current_user.is_anonymous:
-        return jsonify(status='Ok', result='Error')
+        return "Доступ запрещён", 403
 
     user = User.query.get(user_id)
     if not user or not current_user.is_can_edit(user):
-        return jsonify(status='Ok', result='Error')
+        return "Что-то пошло не так", 400
 
     uploaded_file = request.files['file']
     if uploaded_file != '':
@@ -102,33 +103,33 @@ def upload_avatar(user_id):
         user.set_avatar(filename)
         db.session.commit()
 
-        return jsonify(status='Ok', result='Done')
+        return jsonify(result='Done')
 
-    return jsonify(status='Ok', result='Error')
+    return "Что-то пошло не так", 400
 
 
 @app.route('/api/approve', methods=['POST'])
 def approve_avatar():
     if current_user.is_anonymous or not current_user.is_moderator():
-        return jsonify(status='Ok', result='Error')
+        return "Доступ запрещён", 403
 
     if 'id' not in request.form:
-        return jsonify(status='Ok', result='Error')
+        return "Что-то пошло не так", 400
 
     avatar_id = request.form.get('id')
     avatar = Avatar.query.get(avatar_id)
     if not avatar:
-        return jsonify(status='Ok', result='Error')
+        return "Что-то пошло не так", 400
 
     res = recognition.create_new_vector(avatar)
 
     if not res:
-        return jsonify(status='Ok', result='Error')
+        return "Что-то пошло не так", 400
 
     avatar.is_proved = 1
     db.session.commit()
 
-    return jsonify(status='Ok', result='Done')
+    return jsonify(status='Ok', result='Done'), 201
 
 
 @app.route('/')
@@ -154,7 +155,6 @@ def post(post_id):
 @app.route('/new_posts')
 @login_required
 def new_post():
-    # Проверка прав пользователя
     if current_user.is_student():
         abort(403)
 

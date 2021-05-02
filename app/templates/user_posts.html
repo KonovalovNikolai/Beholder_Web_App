@@ -2,7 +2,7 @@
 
 {% block content %}
     {% if not posts %}
-        <p>У вас нет записей.</p>
+        <p>Нет записей.</p>
     {% else %}
         {% for post in posts %}
             {% include '_post.html' %}
