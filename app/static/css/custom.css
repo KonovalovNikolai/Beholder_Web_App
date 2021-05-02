@@ -3,9 +3,10 @@
 }
 
 .border_content {
-    border-color: #708681 !important;
     border-radius: 25px !important;
-    border-width: 1px !important;
+    border: 1px solid #708681 !important;
+    background-color: #F8F8F8;
+
 }
 
 .login {
@@ -47,5 +48,18 @@
 }
 
 .content {
-    margin-left: 140px;
+    padding-left: 140px;
+    padding-right: 140px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.about_user {
+    min-height: 252px;
+    min-width: 252px;
+}
+
+.au_text {
+    font-size: 18px;
+
 }
