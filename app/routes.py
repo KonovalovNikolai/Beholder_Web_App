@@ -7,7 +7,7 @@ from werkzeug.utils import secure_filename
 
 from app import app, db, recognition
 from app.forms import ChangePasswordForm, EditProfileForm, LoginForm, CreatePostForm
-from app.models import Avatar, User, Post, Image, Request
+from app.models import Avatar, User, Post, Image, Request, Journal
 # from app.tasks import recognize_task
 
 
@@ -144,8 +144,35 @@ def take_request(post_id):
     if post.check_student(current_user.get_student().id):
         return "Запрос уже был отправлен", 406
 
-    request = Request(user=current_user, post=post)
-    db.session.add(request)
+    request_ = Request(user=current_user, post=post)
+    db.session.add(request_)
+    db.session.commit()
+
+    return jsonify(result='Done'), 202
+
+
+@app.route('/api/accept_request/<int:post_id>', methods=['POST'])
+def accept_request(post_id):
+    if current_user.is_anonymous or current_user.is_student():
+        return "Доступ запрещён", 403
+
+    if 'id' not in request.form:
+        return "Ошибка", 400
+    user_id = request.form.get('id', type=int)
+
+    post = Post.query.get(post_id)
+    if not current_user.is_can_edit(post):
+        return "Что-то пошло не так", 400
+
+    request_ = Request.query.filter(Request.post_id == post_id, Request.user_id == user_id).first()
+    if not request_:
+        return "Что-то пошло не так", 400
+
+    user = User.query.get(user_id)
+    journal = Journal(student=user.get_student(), post=post, lecturer_proved=1)
+
+    db.session.delete(request_)
+    db.session.add(journal)
     db.session.commit()
 
     return jsonify(result='Done'), 202

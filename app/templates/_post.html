@@ -4,8 +4,5 @@
         <h2>Аудитория: {{ post.room }},</h2>
         <h2>Занятие: {{ post.lesson }}.</h2>
     </div>
-    <div>
-        <img src="{{ url_for('static', filename=post.get_first_image().get_path(to_static=True)) }}" alt="">
-    </div>
     <a href="{{ url_for('post', post_id=post.id) }}">Открыть запись.</a>
 </article>

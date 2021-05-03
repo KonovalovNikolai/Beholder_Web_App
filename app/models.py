@@ -305,7 +305,6 @@ class Post(db.Model):
 
     def get_humanized_time(self):
         time = arrow.get(self.timestamp)
-        print(time.format())
         return time.humanize(locale='ru')
 
     def get_first_image(self):
@@ -313,6 +312,9 @@ class Post(db.Model):
 
     def get_visitors(self):
         return self.journals.all()
+
+    def get_requests(self):
+        return self.requests.order_by(db.desc(Request.timestamp)).all()
 
     def check_student(self, student_id: int):
         res = self.journals.filter(Journal.student_id == student_id).all()
@@ -354,6 +356,10 @@ class Request(db.Model):
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     post_id = db.Column(db.Integer, db.ForeignKey('post.id'))
+
+    def get_humanized_time(self):
+        time = arrow.get(self.timestamp)
+        return time.humanize(locale='ru')
 
 
 class Image(db.Model):

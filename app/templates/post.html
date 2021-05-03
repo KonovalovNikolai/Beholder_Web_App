@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 
 {% block styles %}
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/bxslider/4.2.12/jquery.bxslider.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/details_table.css') }}">
 {% endblock %}
 
@@ -23,7 +22,8 @@
             {# Студент уже отправил запрос - серое окно #}
             <div>
                 <h2>Вы уже отправили запрос.</h2>
-                <button id="cancel-request" class="request-button" data-id="{{ current_user.id }}" data-url="{{ url_for('cancel_request', post_id=post.id) }}">
+                <button id="cancel-request" class="request-button" data-id="{{ current_user.id }}"
+                        data-url="{{ url_for('cancel_request', post_id=post.id) }}" data-action="reload">
                     Отменить
                 </button>
             </div>
@@ -31,7 +31,8 @@
             {# Студент не был отмечен - красное окно #}
             <div>
                 <h2>Вы не были отмечены.</h2>
-                <button id="send-request" class="request-button" data-id="{{ current_user.id }}" data-url="{{ url_for('take_request', post_id=post.id) }}">
+                <button id="send-request" class="request-button" data-id="{{ current_user.id }}"
+                        data-url="{{ url_for('take_request', post_id=post.id) }}" data-action="reload">
                     Попросить отметить
                 </button>
             </div>
@@ -40,40 +41,93 @@
 
     <details open="">
         <summary>Отмеченные студенты</summary>
-        <table>
-            <thead>
-            <tr align="center">
-                <th>Фото</th>
-                <th>ФИО</th>
-                <th>Точность</th>
-                <th>Подтверждён</th>
-            </tr>
-            </thead>
-            {% for visitor in post.get_visitors() %}
-                <tr align="center" user_id="visitor.">
-                    <td><img src="{{ url_for('avatar', filename=visitor.student.user.get_avatar_name()) }}" width="50">
-                    </td>
-                    <td>{{ visitor.student.user.get_fullname() }}</td>
-                    <td>{{ visitor.get_distance() }}</td>
-                    {% if visitor.lecturer_proved == 0 %}
-                        <td>&#9746;</td>
-                        {% if current_user.is_can_edit(post) %}
+        {% with visitors = post.get_visitors() %}
+            {% if not visitors %}
+                <h2>Нет отмеченных посетителей.</h2>
+            {% else %}
+                <table>
+                    <thead>
+                    <tr align="center">
+                        <th>Фото</th>
+                        <th>ФИО</th>
+                        <th>Точность</th>
+                        <th>Подтверждён</th>
+                    </tr>
+                    </thead>
+                    {% for visitor in visitors %}
+                        <tr align="center">
                             <td>
-                                <button>Подтвердить</button>
+                                <img src="{{ url_for('avatar', filename=visitor.student.user.get_avatar_name()) }}"
+                                     width="50">
                             </td>
-                        {% endif %}
-                    {% else %}
-                        <td>&#9745;</td>
-                    {% endif %}
-                </tr>
-            {% endfor %}
-        </table>
+                            <td>{{ visitor.student.user.get_fullname() }}</td>
+                            <td>{{ visitor.get_distance() }}</td>
+                            {% if visitor.lecturer_proved == 0 %}
+                                <td>&#9746;</td>
+                                {% if current_user.is_can_edit(post) %}
+                                    <td>
+                                        <button>&#9745;</button>
+                                    </td>
+                                {% endif %}
+                            {% else %}
+                                <td>&#9745;</td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                </table>
+            {% endif %}
+        {% endwith %}
     </details>
-
+    {% if current_user.is_can_edit(post) %}
     <details>
         <summary>Просят отметить</summary>
-        <table></table>
+        {% with requests = post.get_requests() %}
+            {% if not requests %}
+                <h2 id="no-request-message">Нет запросов.</h2>
+            {% else %}
+                <h2 id="no-request-message" style="display: none;">Нет запросов.</h2>
+                <input type="text" class="table-search form-control pull-right" id="request-search"
+                       placeholder="Поиск по таблице">
+                <button id="accept-selected">Принять выделенные запросы</button>
+                <button id="cancel-selected">Отклонить выделенные запросы</button>
+                <table id="request-table" class="searchable-table">
+                    <thead>
+                    <tr align="center">
+                        <th><input type="checkbox" id="header-checkbox"/></th>
+                        <th>Фото</th>
+                        <th>ФИО</th>
+                        <th>Время</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for request in requests %}
+                        <tr align="center" class="request-row">
+                            <td><input type="checkbox" class="body-checkbox"/></td>
+                            <td>
+                                <img src="{{ url_for('avatar', filename=request.user.get_avatar_name()) }}" width="50">
+                            </td>
+                            <td>{{ request.user.get_fullname() }}</td>
+                            <td>{{ request.get_humanized_time() }}</td>
+                            <td class="button-td">
+                                <button class="request-button accept-button" data-id="{{ request.user.id }}"
+                                        data-url="{{ url_for('accept_request', post_id=post.id) }}"
+                                        data-action="delete">
+                                    &#9745;
+                                </button>
+                                <button class="request-button cancel-button" data-id="{{ request.user.id }}"
+                                        data-url="{{ url_for('cancel_request', post_id=post.id) }}"
+                                        data-action="delete">
+                                    &#9746;
+                                </button>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            {% endif %}
+        {% endwith %}
     </details>
+    {% endif %}
 
     <p>Экспортировать запись в Exel</p>
 
@@ -81,8 +135,38 @@
 
 {% block scripts %}
     <script>
-        if ($('.request-button').length !== 0) {
+        $(document).ready(function () {
+            $(".table-search").keyup(function () {
+                var _this = this;
+                var t_id = $(this).siblings('.searchable-table').attr('id');
+                $.each($(`#${t_id} tbody tr`), function () {
+                    if ($(this).text().toLowerCase().indexOf($(_this).val().toLowerCase()) === -1) {
+                        $(this).hide();
+                    } else {
+                        $(this).show();
+                    }
+                });
+            });
+
+            $("#header-checkbox").click(function () {
+                $('.body-checkbox').prop('checked', $(this).is(':checked'))
+            });
+
+            $('.body-checkbox').click(function () {
+                $('#header-checkbox').prop('checked', false)
+            });
+
+            $("#accept-selected").click(function () {
+                $('input.body-checkbox:checked').parent().siblings('.button-td').children('.accept-button').click()
+            });
+
+            $("#cancel-selected").click(function () {
+                $('input.body-checkbox:checked').parent().siblings('.button-td').children('.cancel-button').click()
+            });
+
             $('.request-button').click(function () {
+                var button = this;
+
                 $(this).attr('disabled', 'disabled');
 
                 var url = $(this).data('url');
@@ -90,21 +174,33 @@
                 var data = new FormData();
                 data.append('id', $(this).data('id'));
 
-                $.ajax({
-                    url: url,
-                    type: 'POST',
-                    cache: false,
-                    data: data,
-                    processData: false,
-                    contentType: false,
-                    success: function (response) {
-                        document.location.reload();
-                    },
-                    error: function (response) {
-                        alert('Что-то пошло не так.\nПопробуйте ещё раз позже.');
-                    }
-                });
+                if ($(button).data('action') === 'reload') {
+                    document.location.reload();
+                }
+
+                $(button).closest('tr').remove();
+
+                if ($('#request-table tbody').children('tr').length === 0) {
+                    $('#request-table').hide();
+                    $('#request-search').hide();
+                    $('#no-request-message').show();
+                }
+
+                {#$.ajax({#}
+                {#    url: url,#}
+                {#    type: 'POST',#}
+                {#    cache: false,#}
+                {#    data: data,#}
+                {#    processData: false,#}
+                {#    contentType: false,#}
+                {#    success: function (response) {#}
+                {#        document.location.reload();#}
+                {#    },#}
+                {#    error: function (response) {#}
+                {#        alert('Что-то пошло не так.\nПопробуйте ещё раз позже.');#}
+                {#    }#}
+                {# });#}
             });
-        }
+        });
     </script>
 {% endblock %}
