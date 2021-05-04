@@ -298,9 +298,13 @@ class Post(db.Model):
     journals = db.relationship('Journal', backref='post', lazy='dynamic')
     requests = db.relationship('Request', backref='post', lazy='dynamic')
 
+    images_number = 0
+
     def get_images(self, get_all=True):
         if get_all:
-            return self.images.all()
+            images = self.images.all()
+            self.images_number = len(images)
+            return images
         return self.images
 
     def get_humanized_time(self):
