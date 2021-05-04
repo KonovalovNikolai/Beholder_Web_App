@@ -16,8 +16,13 @@
         <title>Beholder</title>
     {% endif %}
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"
+            integrity="sha512-+NqPlbbtM1QqiK8ZAo4Yrj2c4lNQoGv8P79DPtKzj++l5jnN39rHA/xsqn8zE9l0uSoxaCdrOgFs6yjyfbBxSg=="
+            crossorigin="anonymous">
+    </script>
     <link rel="stylesheet" href="{{ url_for('.static', filename='css/bootstrap.css') }}">
     <link rel="stylesheet" href="{{ url_for('.static', filename='css/custom.css') }}">
+    <script src="{{ url_for('.static', filename='js/bootstrap.js') }}"></script>
 
     {% block styles %}
     {% endblock %}
@@ -84,11 +89,6 @@
 </div>
 
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"
-        integrity="sha512-+NqPlbbtM1QqiK8ZAo4Yrj2c4lNQoGv8P79DPtKzj++l5jnN39rHA/xsqn8zE9l0uSoxaCdrOgFs6yjyfbBxSg=="
-        crossorigin="anonymous">
-</script>
-<script src="{{ url_for('.static', filename='js/bootstrap.js') }}"></script>
 {% block scripts %}
 {% endblock %}
 

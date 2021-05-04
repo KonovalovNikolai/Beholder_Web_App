@@ -1,13 +1,23 @@
-summary::-webkit-details-marker{display:none;}
-summary::-moz-list-bullet{list-style-type:none;}
-summary::marker{display:none;}
+summary::-webkit-details-marker {
+    display: none;
+}
+
+summary::-moz-list-bullet {
+    list-style-type: none;
+}
+
+summary::marker {
+    display: none;
+}
+
 summary {
     padding: 0em 1.5em .3em .6em;
-    display:inline-block;
-    font-size:1.4em;
+    display: inline-block;
+    font-size: 1.4em;
     cursor: pointer;
     position: relative;
 }
+
 summary:before {
     right: .3em;
     top: .4em;
@@ -19,20 +29,57 @@ summary:before {
     position: absolute;
     transition: transform .5s;
 }
+
 details[open] > summary:before {
     transform: rotateZ(90deg);
 }
+
 summary ~ * {
-    padding:0 1em 0 1em;
+    padding: 0 1em 0 1em;
 }
-details[open] summary ~ *{
+
+details[open] summary ~ * {
     animation: sweep .5s ease-in-out;
 }
+
 @keyframes sweep {
-    0%    {opacity: 0;}
-    100%  {opacity: 1;}
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
 }
-details{
-    display:block;
+
+details {
+    display: block;
     margin-bottom: .5rem;
+}
+
+#visitors-table .sortable {
+    cursor: pointer;
+}
+
+table td,
+table th {
+    text-align: center;
+}
+
+th.sorted[data-order="1"],
+th.sorted[data-order="-1"] {
+    position: relative;
+}
+
+th.sorted[data-order="1"]::after,
+th.sorted[data-order="-1"]::after {
+    right: 8px;
+    position: absolute;
+}
+
+th.sorted[data-order="-1"]::after {
+    content: "▼"
+}
+
+th.sorted[data-order="1"]::after {
+    content: "▲"
 }

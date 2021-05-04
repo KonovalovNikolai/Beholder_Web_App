@@ -132,6 +132,30 @@ def approve_avatar():
     return jsonify(result='Done'), 201
 
 
+@app.route('/api/approve_student/<int:journal_id>', methods=['POST'])
+def approve_student(journal_id):
+    if current_user.is_anonymous or current_user.is_student():
+        return "Доступ запрещён", 403
+
+    if 'id' not in request.form:
+        return "Ошибка", 400
+    student_id = request.form.get('id', type=int)
+
+    student = User.query.get(student_id)
+    journal = Journal.query.get(journal_id)
+
+    if journal.student_id != student.id:
+        return "Что-то пошло не так", 400
+
+    if not current_user.is_can_edit(journal.post):
+        return "Что-то пошло не так", 400
+
+    journal.lecturer_proved = 1
+    db.session.commit()
+
+    return jsonify(result='Done'), 202
+
+
 @app.route('/api/send_request/<int:post_id>', methods=['POST'])
 def take_request(post_id):
     if current_user.is_anonymous or not current_user.is_student():
@@ -169,6 +193,7 @@ def accept_request(post_id):
         return "Что-то пошло не так", 400
 
     user = User.query.get(user_id)
+
     journal = Journal(student=user.get_student(), post=post, lecturer_proved=1)
 
     db.session.delete(request_)

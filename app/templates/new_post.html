@@ -2,7 +2,7 @@
 
 {% block styles %}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.7.1/min/dropzone.min.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='js/hystModal-0.4/dist/hystmodal.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='hystModal-0.4/dist/hystmodal.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/loader.css') }}">
 {% endblock %}
 
@@ -47,7 +47,7 @@
 {% block scripts %}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.7.1/min/dropzone.min.js"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/dropbox.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/hystModal-0.4/dist/hystmodal.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='hystModal-0.4/dist/hystmodal.min.js') }}"></script>
     <script>
         const myModal = new HystModal({
             linkAttributeName: "data-hystmodal",
