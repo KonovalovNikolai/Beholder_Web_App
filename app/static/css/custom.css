@@ -1,10 +1,10 @@
 .body_base {
-    background: #F5EFF2;
+    background: #D1D1D1;
 }
 
 .border_content {
-    border-radius: 25px !important;
-    border: 2px solid #708681 !important;
+
+    box-shadow: -0.3em -0.3em 10px rgba(122,122,122,0.5);
     background-color: #F8F8F8;
     outline-offset: 0px;
 
@@ -49,16 +49,18 @@
 }
 
 .content {
-    margin-left: 110px;
-    margin-right: 110px;
-    padding-left: 30px;
-    padding-right: 30px;
-    padding-top: 20px;
+    margin-left: 15%;
+    margin-right: 15%;
+    padding-left: 35px;
+    padding-right: 35px;
+    padding-top: 25px;
+    background-color: #F8F8F8;
+    box-shadow: -0.3em -0.3em 10px rgba(122,122,122,0.5);
 }
 
 .about_user {
-    min-height: 252px;
-    min-width: 252px;
+    min-height: 250px;
+    min-width: 250px;
 }
 
 .au_text {
@@ -68,7 +70,6 @@
 
 .holder {
     position: relative;
-    border-radius: 25px !important;
 }
 
 .block {
@@ -79,7 +80,6 @@
     top: 0;
     background: rgba(255, 255, 255, 0.5);
     display: none;
-    border-radius: 25px !important;
 }
 
 .holder:hover .block {
@@ -97,10 +97,59 @@
     margin-top: 84%;
 }
 
-.border_img {
-    border-radius: 25px !important;
-    border: 2px solid #708681 !important;
-    background-color: #708681;
+.post_info {
+    float:left; /* Выравнивание по левому краю */
+    margin: 0px 0px 0px 0; /* Отступы вокруг картинки */
+}
 
+.post_m{
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-top: 15px;
+    padding-bottom: 15px;
+    background-color: #FFFFFF;
+}
+
+.column {
+    float: left;
+    width: 55%;
+}
+
+.column_img {
+    float: left;
+    width: 45%;
+
+
+}
+
+/* Clear floats after the columns */
+.row:after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+/* Responsive layout - makes the two columns stack on top of each other instead of next to each other */
+@media screen and (max-width: 1000px) {
+    .column {
+        width: 100%;
+        text-align: center;
+        padding: 0;
+    }
+    .column_img {
+        width: 100%;
+        text-align: center;
+        padding: 0;
+    }
+}
+
+.center {
+    text-align: center;
+    padding: 0;
+}
+
+.but_pos{
+    display: inline-block;
+    vertical-align: bottom;
 
 }
