@@ -1,42 +1,48 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <div class="content">
+    <div class="content mb-2">
         <h1>{{ user.get_fullname() }}</h1>
 
-        <table class="mt-5 ml-1">
+        <table class="my-5 ml-2">
             <tr valign="top">
-                <td class="p-0">
-                    <img src="{{ url_for('avatar', filename=user.get_avatar_name()) }}" alt="User avatar" id="avatar"
-                         class="border_content"></td>
+                <td class="p-0 holder m-0">
+                    <img class="border_content" src="{{ url_for('avatar', filename=user.get_avatar_name()) }}"
+                         alt="User avatar" id="avatar">
+                    {% if current_user.is_can_edit(user) %}
+                        <div class="block">
+                        <a href="{{ url_for("edit_profile", user_id=user.id) }}"><img width="32"
+                                                                                      src="../static/img/svg_icons/pencil-square.svg"></a>
+                    {% endif %}
+                    </div>
+                </td>
 
                 <td height="100%" class="p-0 pl-5">
-                    <div class="border_content p-3 about_user">
+                    <div class="border_content p-3 about_user" style="background-color: #FFFFFF">
                         <h2 class="au_text"> Email:
                             <a href="mailto:{{ user.email }}">{{ user.email }}</a>
-                            </h2>
+                        </h2>
                         <h2 class="au_text">Роль: {{ user.get_role() }}</h2>
                     </div>
                 </td>
 
             </tr>
         </table>
-        {% if current_user.is_can_edit(user) %}
-            <a href="{{ url_for("edit_profile", user_id=user.id) }}">Редактировать</a>
-        {% endif %}
-        <hr>
+
         {% if not user.is_student() %}
-            <h2>Созданные записи:</h2>
+            <h2 class="mb-4">Созданные записи:</h2>
         {% else %}
-            <h2>Посещения:</h2>
+            <h2 class="mb-4">Посещения:</h2>
         {% endif %}
-        {% if not posts %}
-            <p>Нет записей.</p>
-        {% else %}
-            {% for post in posts %}
-                {% include '_post.html' %}
-            {% endfor %}
-            <a href="{{ url_for("user_posts", user_id=user.id) }}">Показать больше...</a>
-        {% endif %}
+        <div class="ml-2 pb-3">
+            {% if not posts %}
+                <p>Нет записей.</p>
+            {% else %}
+                {% for post in posts %}
+                    {% include '_post.html' %}
+                {% endfor %}
+                <a href="{{ url_for("user_posts", user_id=user.id) }}">Показать больше...</a>
+            {% endif %}
+        </div>
     </div>
 {% endblock %}

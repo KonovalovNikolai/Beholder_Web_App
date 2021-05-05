@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
+    <div class="content mb-2">
     {% if prev_url or next_url %}
         <nav aria-label="Posts pages">
             <ul class="pagination">
@@ -19,7 +20,7 @@
     {% endif %}
 
     {% if not posts %}
-        <h1>Здесь будут все записи</h1>
+            <h1>Здесь будут все записи</h1>
     {% else %}
         {% for post in posts %}
             {% include '_post.html' %}
@@ -29,5 +30,5 @@
     {% if not current_user.is_student() %}
         <a href="{{ url_for("new_post") }}">Создать новую запись.</a>
     {% endif %}
-
+    </div>
 {% endblock %}

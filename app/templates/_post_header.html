@@ -1,13 +1,14 @@
-<header id="post-header">
+<header id="post-header" style="height: 50px">
+    <div class="p-0 m-auto">
     <span>
         <a href="{{ url_for('profile', user_id=post.author.id) }}">
-            <img src="{{ url_for('avatar', filename=post.author.get_avatar_name()) }}" width="50">
+            <img class="post_info" src="{{ url_for('avatar', filename=post.author.get_avatar_name()) }}" width="50">
         </a>
-    </span>
-    <span>
-        <a href="{{ url_for('profile', user_id=post.author.id) }}">
+        <a class="ml-3" href="{{ url_for('profile', user_id=post.author.id) }}">
             {{ post.author.get_fullname() }}
-        </a>
+            </a>
+        <br>
+        <span class="ml-3">{{ post.get_humanized_time() }}</span>
     </span>
-    <span>{{ post.get_humanized_time() }}</span>
+    </div>
 </header>
