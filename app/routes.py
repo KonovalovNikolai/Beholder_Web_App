@@ -8,7 +8,7 @@ from werkzeug.utils import secure_filename
 from app import app, db, recognition
 from app.forms import ChangePasswordForm, EditProfileForm, LoginForm, CreatePostForm
 from app.models import Avatar, User, Post, Image, Request, Journal
-from app.tasks import recognize_task
+# from app.tasks import recognize_task
 
 
 def validate_image(stream):
@@ -69,22 +69,22 @@ def upload_post_image():
 
     db.session.commit()
 
-    task = recognize_task.delay(post_id=post.id)
-    return jsonify(url=url_for('recognition_status', task_id=task.id)), 201
+    # task = recognize_task.delay(post_id=post.id)
+    # return jsonify(url=url_for('recognition_status', task_id=task.id)), 201
     return "Ok", 201
 
 
-@app.route('/api/task/<task_id>', methods=['GET'])
-def recognition_status(task_id):
-    if current_user.is_anonymous and current_user.is_student():
-        return "Доступ запрещён", 403
-
-    task = recognize_task.AsyncResult(task_id)
-    if task.ready():
-        post_id = task.get()
-        print(post_id)
-        return jsonify(done=True, url=url_for('post', post_id=post_id)), 201
-    return jsonify(done=False), 201
+# @app.route('/api/task/<task_id>', methods=['GET'])
+# def recognition_status(task_id):
+#     if current_user.is_anonymous and current_user.is_student():
+#         return "Доступ запрещён", 403
+#
+#     task = recognize_task.AsyncResult(task_id)
+#     if task.ready():
+#         post_id = task.get()
+#         print(post_id)
+#         return jsonify(done=True, url=url_for('post', post_id=post_id)), 201
+#     return jsonify(done=False), 201
 
 
 @app.route('/api/upload_avatar/<int:user_id>', methods=['POST'])
@@ -232,7 +232,7 @@ def index():
 @login_required
 def posts():
     page = request.args.get('page', 1, type=int)
-    posts = Post.query.filter(Post.is_done.isnot(0)).order_by(db.desc(Post.timestamp)).paginate(page, 10, True)
+    posts = Post.query.filter(Post.is_done.isnot(0)).order_by(db.desc(Post.timestamp)).paginate(page, 1, True)
 
     next_url = url_for("posts", page=posts.next_num) if posts.has_next else None
     prev_url = url_for("posts", page=posts.prev_num) if posts.has_prev else None
@@ -308,7 +308,7 @@ def user_posts(user_id):
     user = User.query.get_or_404(user_id)
 
     page = request.args.get('page', 1, type=int)
-    posts = user.get_posts(get_all=False).paginate(page, 10, True)
+    posts = user.get_posts(get_all=False).paginate(page, 1, True)
     next_url = url_for("user_posts", user_id=user.id, page=posts.next_num) if posts.has_next else None
     prev_url = url_for("user_posts", user_id=user.id, page=posts.prev_num) if posts.has_prev else None
 
