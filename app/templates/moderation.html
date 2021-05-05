@@ -7,32 +7,44 @@
 {% endblock %}
 
 {% block content %}
+    {% if prev_url or next_url %}
+        <nav aria-label="Posts pages">
+            <ul class="pagination">
+                {% if prev_url %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ prev_url }}">Новее</a>
+                    </li>
+                {% endif %}
+                {% if next_url %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ next_url }}">Позднее</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+
     {% if not avatars %}
         <p>Нет непроверенных фотографий.</p>
     {% else %}
         {% for avatar in avatars %}
-            <div class="approve-box" id="{{ avatar.id }}">
+            <div class="approve-box">
                 <a class="avatar" href="{{ url_for('avatar', filename=avatar.filename) }}" rel="avatars">
                     <img src="{{ url_for('avatar', filename=avatar.filename) }}" alt="Аватар" width="128px"/>
                 </a>
-
                 <p>Пользователь: {{ avatar.user.get_fullname() }}.</p>
                 <div class="btn-group" role="group" aria-label="Approve or reject avatar">
-                    <button type="button" class="approveBtn btn btn-success" data-id="{{ avatar.id }}"
-                            data-action="approve">&#9745;
+                    <button type="button" class="approveBtn btn btn-success"
+                            data-url="{{ url_for('approve_avatar', avatar_id=avatar.id) }}">
+                        &#9745;
                     </button>
-                    <button type="button" class="approveBtn btn btn-danger" data-id="{{ avatar.id }}"
-                            data-action="reject">&#9746;
+                    <button type="button" class="approveBtn btn btn-danger"
+                            data-url="{{ url_for('reject_avatar', avatar_id=avatar.id) }}">
+                        &#9746;
                     </button>
                 </div>
             </div>
         {% endfor %}
-    {% endif %}
-    {% if prev_url %}
-        <a href="{{ prev_url }}">Новее</a>
-    {% endif %}
-    {% if next_url %}
-        <a href="{{ next_url }}">Старше</a>
     {% endif %}
 {% endblock %}
 
@@ -43,37 +55,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fluidbox/2.0.5/js/jquery.fluidbox.min.js"
             integrity="sha512-0kQqdmb3fpKtRwrbCZDlmiwuZgDyPAOLDOu/HyAt4py7lAVDXKknqtqS6dFNV8U8JrHZymQxlO9SFPZ2u8dhMw=="
             crossorigin="anonymous"></script>
-
+    <script src="{{ url_for('static', filename='js/approve_avatar.js') }}"></script>
     <script>
         $('.avatar').fluidbox();
-
-        $('.approveBtn').click(function () {
-            let action = $(this).data('action');
-
-            if (action == "approve") {
-                let idAvatar = $(this).data('id');
-                let data = new FormData();
-                data.append("id", $(this).data('id'));
-
-                $.ajax({
-                    url: '{{ url_for('approve_avatar') }}',
-                    type: 'POST',
-                    cache: false,
-                    data: data,
-                    processData: false,
-                    contentType: false,
-                    success: function (response) {
-                        if (response["result"] == "Done") {
-                            $(`#${idAvatar}`).remove();
-                        } else {
-                            alert('Произошла ошибка');
-                        }
-                    },
-                    error: function (response) {
-                        console.log(response);
-                    }
-                })
-            }
-        });
     </script>
 {% endblock %}

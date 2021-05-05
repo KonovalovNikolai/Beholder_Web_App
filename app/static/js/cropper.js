@@ -59,8 +59,7 @@ $("#crop").click(function () {
 
     canvas.toBlob(function (blob) {
         var data = new FormData();
-
-        data.append("file", blob, "avatar.jpg");
+        data.append("file", blob, 'avatar.png');
 
         $.ajax({
             url: url,
@@ -70,13 +69,8 @@ $("#crop").click(function () {
             processData: false,
             contentType: false,
             success: function (response) {
-                if (response["result"] == "Done") {
-                    alert('Фото загружено');
-                    document.location.reload();
-                } else {
-                    alert('Произошла ошибка');
-                    $("#crop").removeAttr('disabled');
-                }
+                alert('Фото загружено');
+                document.location.reload();
             },
             error: function (response) {
                 console.log(response);

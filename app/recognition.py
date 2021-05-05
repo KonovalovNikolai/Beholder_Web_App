@@ -1,114 +1,86 @@
 from threading import Lock
 import face_recognition
 import numpy as np
-
-from app.models import Student, User, Avatar, Post, Journal
-from app import db
+import copy
 
 
 class FaceRecognition:
 
-    def __init__(self):
+    def __init__(self, known_faces_encodings, students_id):
         self.mutex = Lock()
 
-        self.known_faces_encodings = []
-        self.students_id = []
+        self.known_faces_encodings = known_faces_encodings
+        self.students_id = students_id
 
-        self.__load_students()
-
-    def create_new_vector(self, avatar: Avatar):
-        student = avatar.user.get_student()
-        if not student:
-            return False
-
-        photo = avatar.get_path()
-
-        loaded_image = face_recognition.load_image_file(photo)
+    def create_new_vector(self, image_path, student_id):
+        loaded_image = face_recognition.load_image_file(image_path)
         encoding = face_recognition.face_encodings(loaded_image)
         if len(encoding) != 1:
-            return False
+            raise ValueError()
 
-        student.set_vector(encoding[0])
+        try:
+            index = self.students_id.index(student_id)
+        except ValueError:
+            index = None
 
+        self.__add_vector(student_id=student_id, vector=encoding[0], index=index)
+
+        return encoding[0]
+
+    def recognize_v2(self, images_path):
+        temp_known_faces_encodings = copy.deepcopy(self.known_faces_encodings)
+        temp_students_id = copy.deepcopy(self.students_id)
+
+        # Отмеченные студенты
+        recognized = {}
+
+        for image_path in images_path:
+            # Загрузка изображения
+            loaded_image = face_recognition.load_image_file(image_path)
+            # Считывание дескрипторов на изображении
+            face_encodings = face_recognition.face_encodings(loaded_image)
+
+            for face_encoding in face_encodings:
+                # Поиск совпадений считанного дескриптора в БД
+                result = self.__search(face_encoding, temp_known_faces_encodings)
+
+                if result:
+                    index, distance = result
+                    student_id = temp_students_id[index]
+
+                    if student_id not in recognized:
+                        recognized[student_id] = distance
+                        continue
+
+                    if distance < recognized[student_id]:
+                        recognized[student_id] = distance
+
+        return recognized
+
+    def __add_vector(self, vector, student_id, index=None):
+        self.__change(action=0, vector=vector, student_id=student_id, index=index)
+
+    def delete_vector(self, student_id):
+        index = self.students_id.index(student_id)
+
+        self.__change(action=0, student_id=student_id, index=index)
+
+    def __change(self, action, student_id, vector=None, index=None):
         self.mutex.acquire()
-        self.known_faces_encodings.append(encoding[0])
-        self.students_id.append(student.id)
+        if action == 0:
+            if index:
+                self.known_faces_encodings[index] = vector
+                self.students_id[index] = student_id
+            self.known_faces_encodings.append(vector)
+            self.students_id.append(student_id)
+        else:
+            del self.students_id[index]
+            del self.known_faces_encodings[index]
         self.mutex.release()
 
-        return True
-
-    def recognize_v1(self, post_id):
-        post = Post.query.get(post_id)
-        images = post.get_images()
-        images_path = [image.get_path() for image in images]
-
-        recognited = []
-
-        for image_path in images_path:
-            loaded_image = face_recognition.load_image_file(image_path)
-
-            # face_locations = face_recognition.face_locations(loaded_image)
-            face_encodings = face_recognition.face_encodings(loaded_image)
-
-            for face_encoding in face_encodings:
-                face_distance = face_recognition.face_distance(self.known_faces_encodings, face_encoding)
-                matches = list(face_distance <= 0.6)
-
-                if True in matches:
-                    first_match = matches.index(True)
-                    student_id = self.students_id[first_match]
-                    if student_id not in recognited:
-                        tolerance = face_distance[first_match]
-
-                        recognited.append(student_id)
-                        student = Student.query.get(student_id)
-                        journal = Journal(post=post, student=student, distance=tolerance)
-                        db.session.add(journal)
-                    continue
-
-        post.is_done = 1
-        db.session.commit()
-
-    def recognize_v2(self, post_id):
-        post = Post.query.get(post_id)
-        images = post.get_images()
-        images_path = [image.get_path() for image in images]
-
-        recognized = []
-
-        for image_path in images_path:
-            loaded_image = face_recognition.load_image_file(image_path)
-
-            face_encodings = face_recognition.face_encodings(loaded_image)
-
-            for face_encoding in face_encodings:
-                index = self.__search(face_encoding)
-
-                if index:
-                    index, distance = index
-                    student_id = self.students_id[index]
-                    if student_id not in recognized:
-                        tolerance = distance
-
-                        recognized.append(student_id)
-                        student = Student.query.get(student_id)
-                        journal = Journal(post=post, student=student, distance=tolerance)
-                        db.session.add(journal)
-
-        post.is_done = 1
-        db.session.commit()
-
-    def __search(self, face_to_compare):
-        for i, known_faces_encoding in enumerate(self.known_faces_encodings):
-            distance = np.linalg.norm(known_faces_encoding - face_to_compare)
+    def __search(self, face_to_compare, known_faces_encodings):
+        for i, faces_encoding in enumerate(known_faces_encodings):
+            distance = np.linalg.norm(faces_encoding - face_to_compare)
             if distance <= 0.6:
                 return i, distance
         return None
-
-    def __load_students(self):
-        students = Student.query.filter(Student.vector.isnot(None)).all()
-
-        for student in students:
-            print()
-            self.known_faces_encodings.append(student.get_vector())
-            self.students_id.append(student.id)

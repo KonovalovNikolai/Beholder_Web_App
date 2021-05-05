@@ -267,7 +267,6 @@ class Avatar(db.Model):
 
     def prove(self):
         self.is_proved = 1
-        db.session.commit()
 
 
 class Post(db.Model):
@@ -411,4 +410,3 @@ class Student(db.Model):
     def set_vector(self, array):
         data = json.dumps(array.tolist())
         self.vector = data
-        db.session.commit()

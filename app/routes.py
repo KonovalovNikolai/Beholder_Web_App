@@ -8,6 +8,8 @@ from werkzeug.utils import secure_filename
 from app import app, db, recognition
 from app.forms import ChangePasswordForm, EditProfileForm, LoginForm, CreatePostForm
 from app.models import Avatar, User, Post, Image, Request, Journal
+
+
 # from app.tasks import recognize_task
 
 
@@ -20,9 +22,19 @@ def validate_image(stream):
     return '.' + (format if format != 'jpeg' else 'jpg')
 
 
+@app.errorhandler(400)
+def too_large(e):
+    return "Bad request", 400
+
+
+@app.errorhandler(403)
+def too_large(e):
+    return "Отказано в доступе", 403
+
+
 @app.errorhandler(413)
 def too_large(e):
-    return "File is too large", 413
+    return "Файл слишком большой", 413
 
 
 @app.route('/avatar/<path:filename>')
@@ -33,7 +45,7 @@ def avatar(filename):
 @app.route('/api/secure_image', methods=['POST'])
 def secure_post_image():
     if current_user.is_anonymous and current_user.is_student():
-        return "Доступ запрещён", 403
+        abort(403)
 
     uploaded_file = request.files['file']
     filename = secure_filename(uploaded_file.filename)
@@ -42,18 +54,18 @@ def secure_post_image():
         if file_ext not in app.config['UPLOAD_EXTENSIONS'] or \
                 file_ext != validate_image(uploaded_file.stream):
             return "Некорректный формат изображения", 400
+
     return '', 204
 
 
 @app.route('/api/upload_image', methods=['POST'])
 def upload_post_image():
     if current_user.is_anonymous and current_user.is_student():
-        return "Доступ запрещён", 403
+        abort(403)
 
     form = CreatePostForm()
 
-    post = Post(author=current_user, lesson=form.lesson.data, room=form.room.data, notes=form.notes.data, is_done=0)
-    db.session.add(post)
+    accept = {}
 
     for key, f in request.files.items():
         if key.startswith('file'):
@@ -63,10 +75,17 @@ def upload_post_image():
                 if file_ext not in app.config['UPLOAD_EXTENSIONS'] or file_ext != validate_image(f.stream):
                     continue
                 filename = '{}_{}{}'.format(current_user.id, str(uuid.uuid4()), file_ext)
-                image = Image(post=post, filename=filename)
-                f.save(os.path.join('app/static/' + app.config['POST_IMG_PATH'], image.filename))
-                db.session.add(image)
+                accept[filename] = f
 
+    if len(accept) == 0:
+        abort(400)
+
+    post = Post(author=current_user, lesson=form.lesson.data, room=form.room.data, notes=form.notes.data, is_done=0)
+    for filename, file in accept.items():
+        image = Image(post=post, filename=filename)
+        file.save(os.path.join('app/static/' + app.config['POST_IMG_PATH'], image.filename))
+        db.session.add(image)
+    db.session.add(post)
     db.session.commit()
 
     # task = recognize_task.delay(post_id=post.id)
@@ -77,7 +96,7 @@ def upload_post_image():
 # @app.route('/api/task/<task_id>', methods=['GET'])
 # def recognition_status(task_id):
 #     if current_user.is_anonymous and current_user.is_student():
-#         return "Доступ запрещён", 403
+#         return abort(403)
 #
 #     task = recognize_task.AsyncResult(task_id)
 #     if task.ready():
@@ -90,108 +109,134 @@ def upload_post_image():
 @app.route('/api/upload_avatar/<int:user_id>', methods=['POST'])
 def upload_avatar(user_id):
     if current_user.is_anonymous:
-        return "Доступ запрещён", 403
+        abort(403)
 
     user = User.query.get(user_id)
     if not user or not current_user.is_can_edit(user):
-        return "Что-то пошло не так", 400
+        abort(403)
 
-    uploaded_file = request.files['file']
-    if uploaded_file != '':
-        filename = str(user.id) + '.png'
-        uploaded_file.save(os.path.join('app/' + app.config['AVATARS_PATH'], filename))
+    f = request.files['file']
+    filename = secure_filename(f.filename)
+    if filename == '':
+        abort(400)
 
-        user.set_avatar(filename)
-        db.session.commit()
+    file_ext = os.path.splitext(filename)[1]
+    if file_ext not in app.config['UPLOAD_EXTENSIONS'] or file_ext != validate_image(f.stream):
+        abort(400)
 
-        return jsonify(result='Done'), 202
+    avatar = user.get_avatar()
+    student = user.get_student()
+    if avatar and student:
+        recognition.delete_vector(student.id)
 
-    return "Что-то пошло не так", 400
+    filename = '{}{}'.format(str(user_id), file_ext)
+    f.save(os.path.join('app/' + app.config['AVATARS_PATH'], filename))
 
-
-@app.route('/api/approve', methods=['POST'])
-def approve_avatar():
-    if current_user.is_anonymous or not current_user.is_moderator():
-        return "Доступ запрещён", 403
-
-    if 'id' not in request.form:
-        return "Что-то пошло не так", 400
-
-    avatar_id = request.form.get('id')
-    avatar = Avatar.query.get(avatar_id)
-    if not avatar:
-        return "Что-то пошло не так", 400
-
-    res = recognition.create_new_vector(avatar)
-
-    if not res:
-        return "Что-то пошло не так", 400
-
-    avatar.is_proved = 1
+    user.set_avatar(filename)
     db.session.commit()
 
-    return jsonify(result='Done'), 201
+    return 'Ok', 202
+
+
+@app.route('/api/approve_avatar/<int:avatar_id>', methods=['POST'])
+def approve_avatar(avatar_id):
+    if current_user.is_anonymous or not current_user.is_moderator():
+        abort(403)
+
+    avatar = Avatar.query.get(avatar_id)
+    if not avatar:
+        abort(400)
+
+    student = avatar.user.get_student()
+    if not student:
+        abort(400)
+
+    try:
+        vector = recognition.create_new_vector(avatar.get_path(), student.id)
+    except ValueError:
+        abort(400)
+
+    student.set_vector(vector)
+    avatar.prove()
+    db.session.commit()
+
+    return 'Ok', 201
+
+
+@app.route('/api/reject_avatar/<int:avatar_id>', methods=['POST'])
+def reject_avatar(avatar_id):
+    if current_user.is_anonymous or not current_user.is_moderator():
+        abort(403)
+
+    avatar = Avatar.query.get(avatar_id)
+    if not avatar:
+        abort(400)
+
+    db.session.delete(avatar)
+    db.session.commit()
+
+    return 'Ok', 201
 
 
 @app.route('/api/approve_student/<int:journal_id>', methods=['POST'])
 def approve_student(journal_id):
     if current_user.is_anonymous or current_user.is_student():
-        return "Доступ запрещён", 403
+        abort(403)
 
     if 'id' not in request.form:
-        return "Ошибка", 400
+        abort(400)
     student_id = request.form.get('id', type=int)
 
     student = User.query.get(student_id)
     journal = Journal.query.get(journal_id)
 
     if journal.student_id != student.id:
-        return "Что-то пошло не так", 400
+        abort(400)
 
     if not current_user.is_can_edit(journal.post):
-        return "Что-то пошло не так", 400
+        abort(400)
 
     journal.lecturer_proved = 1
     db.session.commit()
 
-    return jsonify(result='Done'), 202
+    return 'Ok', 202
 
 
 @app.route('/api/send_request/<int:post_id>', methods=['POST'])
 def take_request(post_id):
     if current_user.is_anonymous or not current_user.is_student():
-        return "Доступ запрещён", 403
+        abort(403)
 
     post = Post.query.get(post_id)
     if not post:
-        return "Что-то пошло не так", 400
+        abort(400)
 
     if post.check_student(current_user.get_student().id):
-        return "Запрос уже был отправлен", 406
+        abort(406)
 
     request_ = Request(user=current_user, post=post)
     db.session.add(request_)
     db.session.commit()
 
-    return jsonify(result='Done'), 202
+    return 'Ok', 202
 
 
 @app.route('/api/accept_request/<int:post_id>', methods=['POST'])
 def accept_request(post_id):
     if current_user.is_anonymous or current_user.is_student():
-        return "Доступ запрещён", 403
+        abort(403)
 
     if 'id' not in request.form:
-        return "Ошибка", 400
+        abort(400)
     user_id = request.form.get('id', type=int)
 
     post = Post.query.get(post_id)
     if not current_user.is_can_edit(post):
-        return "Что-то пошло не так", 400
+        abort(400)
 
     request_ = Request.query.filter(Request.post_id == post_id, Request.user_id == user_id).first()
     if not request_:
-        return "Что-то пошло не так", 400
+        abort(400)
 
     user = User.query.get(user_id)
 
@@ -201,26 +246,26 @@ def accept_request(post_id):
     db.session.add(journal)
     db.session.commit()
 
-    return jsonify(result='Done'), 202
+    return 'Ok', 202
 
 
 @app.route('/api/cancel_request/<int:post_id>', methods=['POST'])
 def cancel_request(post_id):
     if current_user.is_anonymous:
-        return "Доступ запрещён", 403
+        abort(403)
 
     if 'id' not in request.form:
-        return "Ошибка", 400
+        abort(400)
 
     user_id = request.form.get('id', type=int)
     if current_user.is_student():
         if current_user.id != user_id:
-            return "Ошибка", 400
+            abort(400)
 
     Request.query.filter(Request.post_id == post_id, Request.user_id == user_id).delete()
     db.session.commit()
 
-    return jsonify(result='Done'), 202
+    return 'Ok', 202
 
 
 @app.route('/')

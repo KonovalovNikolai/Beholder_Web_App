@@ -40,7 +40,23 @@ migrate = Migrate(app, db)
 # celery = make_celery(app)
 
 from app.recognition import FaceRecognition
-recognition = FaceRecognition()
+from app.models import Student
+
+
+def make_recognition():
+    students = Student.query.filter(Student.vector.isnot(None)).all()
+
+    known_faces_encodings = []
+    students_id = []
+
+    for student in students:
+        known_faces_encodings.append(student.get_vector())
+        students_id.append(student.id)
+
+    return FaceRecognition(known_faces_encodings, students_id)
+
+
+recognition = make_recognition()
 
 
 from app import routes, models
