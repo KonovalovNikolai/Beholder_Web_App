@@ -73,13 +73,16 @@
 {% block modalWindow %}
 {% endblock %}
 
-{% with messages = get_flashed_messages() %}
+{% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
-        <ul class="d-flex justify-content-center col-sm">
-            {% for message in messages %}
-                <li class="li_mes">{{ message }}</li>
-            {% endfor %}
-        </ul>
+        {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        {% endfor %}
     {% endif %}
 {% endwith %}
 
@@ -88,7 +91,9 @@
     {% endblock %}
 </div>
 
-
+<script>
+    $('.alert').alert()
+</script>
 {% block scripts %}
 {% endblock %}
 

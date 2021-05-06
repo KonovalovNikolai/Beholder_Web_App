@@ -92,8 +92,8 @@ class User(UserMixin, db.Model):
         if self.is_student():
             return 'Студент'
         if self.is_lecture():
-            return 'Lecture'
-        return 'Moderator'
+            return 'Сотрудник'
+        return 'Модератор'
 
     def get_posts(self, limit=None, order_by_time=False, get_all=True):
         """
@@ -320,7 +320,8 @@ class Post(db.Model):
         return self.requests.order_by(db.desc(Request.timestamp)).all()
 
     def check_student(self, student_id: int):
-        res = self.journals.filter(Journal.student_id == student_id).all()
+        res = self.journals.filter(Journal.student_id == student_id).first()
+        print(res.student_id)
         if res:
             return True
         return False

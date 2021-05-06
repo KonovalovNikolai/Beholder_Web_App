@@ -47,6 +47,7 @@ $("#crop").click(function () {
     $(this).attr('disabled', 'disabled');
     if (cropper == '') {
         alert('Загрузите фото');
+        $(this).attr('disabled', 'disabled');
         return false;
     }
 
@@ -69,8 +70,7 @@ $("#crop").click(function () {
             processData: false,
             contentType: false,
             success: function (response) {
-                alert('Фото загружено');
-                document.location.reload();
+                location.reload();
             },
             error: function (response) {
                 console.log(response);

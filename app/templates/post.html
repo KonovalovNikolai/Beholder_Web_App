@@ -28,27 +28,30 @@
     </div>
 
     {% if current_user.is_student() %}
-        {% if post.check_student(current_user.id) %}
-            {# Студент был отмечен - зелённое окно #}
-            <div>
-                <h2>Вас отметили.</h2>
+        {% if post.check_student(current_user.get_student().id) %}
+            <div class="alert alert-success" role="alert">
+                <h4 class="alert-heading">Вы были отмечены!</h4>
+                <p>Вы были отмечены на этом занятии.</p>
             </div>
         {% elif current_user.check_request(post.id) %}
             {# Студент уже отправил запрос - серое окно #}
-            <div>
-                <h2>Вы уже отправили запрос.</h2>
+            <div class="alert alert-secondary" role="alert">
+                <h4 class="alert-heading">Запрос отправлен.</h4>
+                <p>Вы будете отмечены, если ваш запрос будет принят.</p>
                 <button id="cancel-request" class="request-button" data-id="{{ current_user.id }}"
                         data-url="{{ url_for('cancel_request', post_id=post.id) }}" data-action="reload">
-                    Отменить
+                    Отменить запрос.
                 </button>
             </div>
         {% else %}
             {# Студент не был отмечен - красное окно #}
-            <div>
-                <h2>Вы не были отмечены.</h2>
+            <div class="alert alert-danger" role="alert">
+                <h4 class="alert-heading">Вы не отмечены.</h4>
+                <p>Вы не отмечены на этом занятии. Вы можете отправить запрос. Вы будете отмечены, если ваш
+                    запрос будет принят.</p>
                 <button id="send-request" class="request-button" data-id="{{ current_user.id }}"
                         data-url="{{ url_for('take_request', post_id=post.id) }}" data-action="reload">
-                    Попросить отметить
+                    Попросить отметить.
                 </button>
             </div>
         {% endif %}
@@ -75,8 +78,10 @@
                     {% for visitor in visitors %}
                         <tr align="center">
                             <td>
-                                <img src="{{ url_for('avatar', filename=visitor.student.user.get_avatar_name()) }}"
-                                     width="50">
+                                <a href="{{ url_for('profile', user_id=visitor.student.user.id) }}" target="_blank">
+                                    <img src="{{ url_for('avatar', filename=visitor.student.user.get_avatar_name()) }}"
+                                         width="50">
+                                </a>
                             </td>
                             <td class="fullname">{{ visitor.student.user.get_fullname() }}</td>
                             <td>{{ visitor.get_distance() }}</td>
@@ -126,8 +131,10 @@
                             <tr align="center" class="request-row">
                                 <td><input type="checkbox" class="body-checkbox"/></td>
                                 <td>
-                                    <img src="{{ url_for('avatar', filename=request.user.get_avatar_name()) }}"
-                                         width="50">
+                                    <a href="{{ url_for('profile', user_id=request.user.id) }}" target="_blank">
+                                        <img src="{{ url_for('avatar', filename=request.user.get_avatar_name()) }}"
+                                             width="50">
+                                    </a>
                                 </td>
                                 <td class="fullname">{{ request.user.get_fullname() }}</td>
                                 <td>{{ request.get_humanized_time() }}</td>

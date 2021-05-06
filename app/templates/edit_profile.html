@@ -11,12 +11,28 @@
     <div class="hystmodal" id="myModal" aria-hidden="true">
         <div class="hystmodal__wrap">
             <div class="hystmodal__window" role="dialog" aria-modal="true">
-                <p>Изменить фото.</p>
-                <input type="file" id="cropperfile"/>
-                <div style="width:300px;height:400px;">
-                    <img src="" id="cropper-img"/>
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Изменить фото.</h4>
+                    </div>
+                    <div class="modal-body" style="display: block; margin: auto">
+                        <div class="input-group">
+                            <div class="custom-file">
+                                <input type="file" class="custom-file-input" id="cropperfile"
+                                       aria-describedby="inputGroupFileAddon01">
+                                <label class="custom-file-label" for="inputGroupFile01">выберите изображение</label>
+                            </div>
+                        </div>
+                        <div style="width:500px;height:400px;">
+                            <img src="" id="cropper-img"/>
+                        </div>
+                    </div>
                 </div>
-                <button id="crop" action="{{ url_for('upload_avatar', user_id=user.id) }}">Загрузить</button>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="crop"
+                            action="{{ url_for('upload_avatar', user_id=user.id) }}">Загрузить
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -24,31 +40,36 @@
 
 {% block content %}
     <div class="content">
-    <h1 class=" mb-5">{{ user.get_fullname() }}: Редактирование профиля.</h1>
+    <h1 class=" mb-5" id="user-name" data-role="{{ user.type }}">{{ user.get_fullname() }}: Редактирование профиля.</h1>
     <div class="row">
-    <div class="column_img center" style="background-color:#aaa;">
-        <img class="border_content ml-2" src="{{ url_for('avatar', filename=user.get_avatar_name()) }}" alt="User avatar"
-         id="avatar">
-    <br>
-    <button class="mt-2" id="new-avatr" data-hystmodal="#myModal">Изменить аватар.</button>
-    <br>
-    </div>
-    <div class="column" style="background-color:#bbb;">
-         <form action="" method="POST">
-        {{ profile_form.hidden_tag() }}
-        {% for field in profile_form if field.name != "csrf_token" %}
-            <p class="m-0">{{ field.label(class = "m-0") }}</p>
-            <p class="mb-2">
-                {{ field }}
-                {% for error in field.errors %}
-                    <span style="color: red;">{{ error }}</span>
+        <div class="column_img center" style="background-color:#aaa;">
+            <img class="border_content ml-2" src="{{ url_for('avatar', filename=user.get_avatar_name()) }}"
+                 alt="User avatar"
+                 id="avatar">
+            <br>
+            <button type="button" class="mt-2 btn btn-primary" id="new-avatr" data-hystmodal="#myModal">Изменить
+                аватар.
+            </button>
+            <br>
+        </div>
+        <div class="column" style="background-color:#bbb;">
+            <form action="" method="POST">
+                {{ profile_form.hidden_tag() }}
+                {% for field in profile_form if field.name != "csrf_token" %}
+                    <p class="m-0">{{ field.label(class = "m-0") }}</p>
+                    <p class="mb-2">
+                        {{ field }}
+                    </p>
+                    <p>
+                        {% for error in field.errors %}
+                            <span style="color: red;">{{ error }}</span>
+                        {% endfor %}
+                    </p>
                 {% endfor %}
-            </p>
-        {% endfor %}
-
-    </form>
-     <p class="mb-1 but_pos"><input type="submit" name="{{ profile_form.form_name }}" value="Редактировать"></p>
-    </div>
+                <p class="mb-1 but_pos"><input type="submit" name="{{ profile_form.form_name }}" value="Редактировать">
+                </p>
+            </form>
+        </div>
     </div>
     <p>Изменить пароль</p>
     <form action="" method="POST">

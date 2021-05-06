@@ -15,10 +15,12 @@ class LoginForm(FlaskForm):
 
 class EditProfileForm(FlaskForm):
     form_name = 'EditProfileForm'
-    email = StringField('Email', validators=[Email(message='Некоректный email')])
-    firstname = StringField('Имя')
-    lastname = StringField('Фамилия')
-    patronymic = StringField('Отчество')
+    email = StringField('Email', validators=[Email(message='Некоректный email'),
+                                             DataRequired(message='Поле должно быть заполнено'),
+                                             Length(max=32, message='Максимальная длина - 32 символа %(max)d')])
+    firstname = StringField('Имя', validators=[Length(max=32, message='Максимальная длина - 32 символа %(max)d')])
+    lastname = StringField('Фамилия', validators=[Length(max=32, message='Максимальная длина - 32 символа %(max)d')])
+    patronymic = StringField('Отчество', validators=[Length(max=32, message='Максимальная длина - 32 символа %(max)d')])
 
 
 class ChangePasswordForm(FlaskForm):

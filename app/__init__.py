@@ -33,6 +33,8 @@ bootstrap = Bootstrap(app)
 
 login = LoginManager(app)
 login.login_view = 'login'
+login.login_message = 'Пожалуйста, авторизуйтесь, чтобы получить доступ к этой странице.'
+login.login_message_category = 'secondary'
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)

@@ -23,12 +23,12 @@ def validate_image(stream):
 
 
 @app.errorhandler(400)
-def too_large(e):
+def bad_request(e):
     return "Bad request", 400
 
 
 @app.errorhandler(403)
-def too_large(e):
+def forbidden(e):
     return "Отказано в доступе", 403
 
 
@@ -134,6 +134,11 @@ def upload_avatar(user_id):
 
     user.set_avatar(filename)
     db.session.commit()
+
+    if user.is_student():
+        flash('Фото успешно загружено и будет отображено после модерации.', 'success')
+    else:
+        flash('Фото успешно загружено.', 'success')
 
     return 'Ok', 202
 
@@ -329,16 +334,17 @@ def edit_profile(user_id):
     if profile_form.form_name in request.form and profile_form.validate_on_submit():
         user.update_from_form(profile_form)
         db.session.commit()
+        flash('Данные были изменены.', 'success')
         return redirect(url_for('edit_profile', user_id=user_id))
 
     # Обработка формы изменения пароля
     if password_form.form_name in request.form and password_form.validate_on_submit():
         # Проверка совпадения старого пароля
         if user.check_password(password_form.old_password):
-            flash('Неверно введён пароль')
+            flash('Неверно введён пароль.', 'danger')
             return redirect(url_for('edit_profile', user_id=user_id))
         user.set_password(password_form.new_password)
-        flash('Пароль был изменён')
+        flash('Пароль был изменён.', 'success')
         return redirect(url_for('edit_profile', user_id=user_id))
 
     user.fill_form(profile_form)
@@ -375,10 +381,11 @@ def login():
 
         # Проверка введённых
         if user is None or not user.check_password(form.password.data):
-            flash('Неверная почта или пароль.')
+            flash('Неверная почта или пароль.', 'danger')
             return redirect(url_for('login'))
 
         login_user(user, remember=form.remember_me.data)
+        flash(f'Успешный вход. Добро пожаловать, {current_user.get_fullname()}!', 'success')
         return redirect(url_for('index'))
 
     return render_template('login.html', title='Вход', form=form)
