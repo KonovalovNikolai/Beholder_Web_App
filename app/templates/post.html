@@ -159,12 +159,16 @@
         </details>
     {% endif %}
 
-    <p>Экспортировать запись в Exel</p>
+    <button id="excel-download" class="btn btn-primary" type="button"
+            data-url="{{ url_for('download_excel', post_id=post.id) }}">
+        Экспортировать запись в Exel
+    </button>
 
 {% endblock %}
 
 {% block scripts %}
-    <script src="{{ url_for('.static', filename='js/prove_student.js') }}"></script>
-    <script src="{{ url_for('.static', filename='js/image_slider.js') }}"></script>
-    <script src="{{ url_for('.static', filename='js/table.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/prove_student.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/image_slider.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/table.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/excel_download.js') }}"></script>
 {% endblock %}

@@ -12,9 +12,11 @@ class Config(object):
     CELERY_BROKER_URL = 'redis://localhost:6379/0'
     CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
 
-    AVATARS_PATH = 'img/avatars/'
+    AVATARS_PATH = 'non_static/avatars/'
     DEFAULT_AVATAR = 'default.png'
     POST_IMG_PATH = 'img/post_img/'
 
     UPLOAD_EXTENSIONS = ['.jpg', '.png']
     MAX_CONTENT_LENGTH = 8 * 1024 * 1024
+
+    EXCEL_FILES_PATH = 'non_static/excel_files/'

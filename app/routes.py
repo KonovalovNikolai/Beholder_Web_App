@@ -11,6 +11,7 @@ from app.models import Avatar, User, Post, Image, Request, Journal
 
 
 # from app.tasks import recognize_task
+from app.tasks import import_to_excel
 
 
 def validate_image(stream):
@@ -40,6 +41,25 @@ def too_large(e):
 @app.route('/avatar/<path:filename>')
 def avatar(filename):
     return send_from_directory(app.config["AVATARS_PATH"], filename, as_attachment=True)
+
+
+@app.route('/download/<path:filename>')
+def download_file(filename):
+    return send_from_directory(app.config["EXCEL_FILES_PATH"], filename)
+
+
+@app.route('/api/download_excel/<int:post_id>')
+def download_excel(post_id):
+    if current_user.is_anonymous:
+        abort(403)
+
+    post = Post.query.get(post_id)
+    if not post:
+        abort(403)
+
+    import_to_excel(post_id)
+
+    return jsonify(url=url_for('download_file', filename=post.excel_file_name))
 
 
 @app.route('/api/secure_image', methods=['POST'])
@@ -195,12 +215,13 @@ def approve_student(journal_id):
     student = User.query.get(student_id)
     journal = Journal.query.get(journal_id)
 
-    if journal.student_id != student.id:
+    if not journal or journal.student_id != student.id:
         abort(400)
 
     if not current_user.is_can_edit(journal.post):
         abort(400)
 
+    journal.post.changed = 0
     journal.lecturer_proved = 1
     db.session.commit()
 
@@ -246,7 +267,7 @@ def accept_request(post_id):
     user = User.query.get(user_id)
 
     journal = Journal(student=user.get_student(), post=post, lecturer_proved=1)
-
+    post.changed = 0
     db.session.delete(request_)
     db.session.add(journal)
     db.session.commit()
@@ -408,5 +429,5 @@ def moderation():
     next_url = url_for("moderation", page=avatars.next_num) if avatars.has_next else None
     prev_url = url_for("moderation", page=avatars.prev_num) if avatars.has_prev else None
 
-    return render_template('moderation.html', title='Модерация', avatars=avatars.items, next_url=next_url,
+    return render_template('moderation.html', title='Модерация - проверка изображений', avatars=avatars.items, next_url=next_url,
                            prev_url=prev_url)

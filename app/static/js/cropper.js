@@ -57,7 +57,7 @@ $("#crop").click(function () {
     });
 
     var url = $(this).attr('action');
-
+$("#crop").removeAttr('disabled');
     canvas.toBlob(function (blob) {
         var data = new FormData();
         data.append("file", blob, 'avatar.png');
