@@ -10,7 +10,7 @@
         <div class="row">
             <div class="col-md-2 mr-0 px-0 border-right">
                 <ul class="nav nav-pills flex-column ">
-                    <li class="nav-item bg-white border menu-verk rounded-left" style="" >
+                    <li class="nav-item bg-white border menu-verk rounded-left" style="">
                         <a class="nav-link active  bg-white text-dark" href="#">Фото</a>
                     </li>
                     <li class="nav-item">
@@ -47,8 +47,9 @@
     <script type="application/javascript"
             src="https://cdn.jsdelivr.net/npm/fluidbox@2.0.5/dist/js/jquery.fluidbox.min.js"
             integrity="sha256-AVBLVWwvNE9uzNP36wynCSm3JIIkjvjXsj/Ol30JzGM=" crossorigin="anonymous"></script>
-
     <script type="application/javascript"
             src="{{ url_for('static', filename='js/moderation/approve_avatar.js') }}"></script>
-    <script type="application/javascript" src="{{ url_for('static', filename='js/moderation/fluidbox.js') }}"></script>
+    <script>
+        $('.avatar').fluidbox();
+    </script>
 {% endblock %}

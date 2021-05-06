@@ -54,4 +54,14 @@
             integrity="sha256-J/tLORlSjPV0eY9TJriCBECEVi2/reNXbJS4SbZsm7w=" crossorigin="anonymous"></script>
 
     <script type="application/javascript" src="{{ url_for('static', filename='js/new_post/dropbox.js') }}"></script>
+
+    <script>
+        const myModal = new HystModal({
+            linkAttributeName: "data-hystmodal",
+            closeOnOverlay: false,
+            closeOnEsc: false,
+            closeOnButton: false
+            // настройки (не обязательно), см. API
+        });
+    </script>
 {% endblock %}
