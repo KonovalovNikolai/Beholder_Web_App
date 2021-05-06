@@ -1,10 +1,10 @@
 .body_base {
-    background: #D1D1D1;
+    background: #F8F8F8;
 }
 
 .border_content {
 
-    box-shadow: -0.3em -0.3em 10px rgba(122,122,122,0.5);
+    /*box-shadow: -0.3em -0.3em 10px rgba(122, 122, 122, 0.5);*/
     background-color: #F8F8F8;
     outline-offset: 0px;
 
@@ -49,18 +49,12 @@
 }
 
 .content {
-    margin-left: 15%;
-    margin-right: 15%;
     padding-left: 35px;
     padding-right: 35px;
     padding-top: 25px;
+    padding-bottom: 25px;
     background-color: #F8F8F8;
-    box-shadow: -0.3em -0.3em 10px rgba(122,122,122,0.5);
-}
-
-.about_user {
-    min-height: 250px;
-    min-width: 250px;
+    /*box-shadow: -0.3em -0.3em 10px rgba(122, 122, 122, 0.5);*/
 }
 
 .au_text {
@@ -70,6 +64,8 @@
 
 .holder {
     position: relative;
+    width: 250px;
+    height: auto;
 }
 
 .block {
@@ -78,41 +74,55 @@
     bottom: 0;
     right: 0;
     top: 0;
-    background: rgba(255, 255, 255, 0.5);
+    background-color: rgba(255, 255, 255, 0.5);
     display: none;
+}
+
+.block:active {
+    background-color: rgba(255, 255, 255, 0.4);
 }
 
 .holder:hover .block {
     display: block;
 }
 
-.block a{
+.block a {
     display: block;
     height: 100%;
 
 }
 
 .block img {
-    margin-left: 4%;
-    margin-top: 84%;
+    position: absolute;
+    bottom: 3%;
+    left: 3%;
+    margin: 0;
+
 }
 
 .post_info {
-    float:left; /* Выравнивание по левому краю */
+    float: left; /* Выравнивание по левому краю */
     margin: 0px 0px 0px 0; /* Отступы вокруг картинки */
 }
 
-.post_m{
-    padding-left: 20px;
-    padding-right: 20px;
+.post_m {
+    padding-left: 35px;
+    padding-right: 35px;
     padding-top: 15px;
     padding-bottom: 15px;
-    background-color: #FFFFFF;
+    background-color: #F8F8F8;
 }
 
 .column {
     float: left;
     width: 55%;
+    position: relative;
+}
+
+.column_edit {
+    float: left;
+    width: 55%;
+    position: relative;
 }
 
 .column_img {
@@ -136,20 +146,94 @@
         text-align: center;
         padding: 0;
     }
+
     .column_img {
         width: 100%;
         text-align: center;
-        padding: 0;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .holder {
+        text-align: center;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .but_pos {
+        position: static !important;
+    }
+
+    .input_center {
+         text-align: center !important;
+    }
+
+    .column_edit {
+        width: 100%;
+        text-align: center;
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: 25px;
     }
 }
 
 .center {
     text-align: center;
     padding: 0;
+    margin-left: auto;
+    margin-right: auto;
 }
 
-.but_pos{
-    display: inline-block;
-    vertical-align: bottom;
+.but_pos {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    margin: 0;
 
+}
+
+.content_margin {
+    margin-left: 5%;
+    margin-right: 5%;
+    /*box-shadow: -0.3em 0 10px rgba(122, 122, 122, 0.5);*/
+}
+
+.no_dec a {
+    text-decoration: none;
+}
+
+.link_all_div a {
+    display: block; /* Ссылка как блочный элемент */
+    text-align: center; /* Выравнивание по центру */
+    height: 100%;
+}
+
+.open_entry {
+    text-decoration: none;
+}
+
+.open_entry:active {
+    color: red;
+}
+
+.click_link {
+
+}
+
+.click_link:active {
+    color: #2E3C56;
+}
+
+.padding {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+.input_center {
+    text-align: left;
+
+}
+
+.margin {
+    margin-top: 25px;
 }

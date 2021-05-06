@@ -1,13 +1,38 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <div class="content mb-2">
-        <h1>{{ user.get_fullname() }}</h1>
+    <div class="content content_margin mb-4">
+        <h1 class="m-0 mb-5">{{ user.get_fullname() }}</h1>
 
-        <table class="my-5 ml-2">
+
+        <div class="row padding">
+            <div class="column_img">
+                <div class="holder m-o p-0">
+                    <img  src="{{ url_for('avatar', filename=user.get_avatar_name()) }}"
+                         alt="User avatar" id="avatar">
+                    {% if current_user.is_can_edit(user) %}
+                        <div class="block">
+                        <a href="{{ url_for("edit_profile", user_id=user.id) }}"><img width="32"
+                                                                                      src="../static/img/svg_icons/pencil-square.svg"></a>
+                    {% else %}
+                            <div>
+                                {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="column mt-3">
+                <h2 class="au_text"> Email:
+                    <a href="mailto:{{ user.email }}">{{ user.email }}</a>
+                </h2>
+                <h2 class="au_text">Роль: {{ user.get_role() }}</h2>
+            </div>
+        </div>
+
+
+        <!--<table class="mt-5">
             <tr valign="top">
                 <td class="p-0 holder m-0">
-                    <img class="border_content" src="{{ url_for('avatar', filename=user.get_avatar_name()) }}"
+                    <img class="" src="{{ url_for('avatar', filename=user.get_avatar_name()) }}"
                          alt="User avatar" id="avatar">
                     {% if current_user.is_can_edit(user) %}
                         <div class="block">
@@ -18,7 +43,7 @@
                 </td>
 
                 <td height="100%" class="p-0 pl-5">
-                    <div class="border_content p-3 about_user" style="background-color: #FFFFFF">
+                    <div class=" p-3 about_user">
                         <h2 class="au_text"> Email:
                             <a href="mailto:{{ user.email }}">{{ user.email }}</a>
                         </h2>
@@ -27,22 +52,30 @@
                 </td>
 
             </tr>
-        </table>
-
-        {% if not user.is_student() %}
-            <h2 class="mb-4">Созданные записи:</h2>
-        {% else %}
-            <h2 class="mb-4">Посещения:</h2>
-        {% endif %}
-        <div class="ml-2 pb-3">
-            {% if not posts %}
-                <p>Нет записей.</p>
-            {% else %}
-                {% for post in posts %}
-                    {% include '_post.html' %}
-                {% endfor %}
-                <a href="{{ url_for("user_posts", user_id=user.id) }}">Показать больше...</a>
-            {% endif %}
-        </div>
+        </table>-->
     </div>
+    <div class="content content_margin mb-2">
+        {% if not user.is_student() %}
+            <h2 class="m-0">Созданные записи:</h2>
+        {% else %}
+            <h2 class="m-0">Посещения:</h2>
+        {% endif %}
+    </div>
+
+    {% if not posts %}
+        <div class="content  content_margin mb-2">
+            <p>Нет записей.</p>
+        </div>
+    {% else %}
+        {% for post in posts %}
+            <div class="content_margin">
+                {% include '_post.html' %}
+            </div>
+        {% endfor %}
+        <div class="content_margin center mb-2 link_all_div no_dec border">
+            <a class="click_link btn btn-outline-info btn-block content_post" href="{{ url_for("user_posts", user_id=user.id) }}">Показать больше</a>
+        </div>
+    {% endif %}
+
+
 {% endblock %}
