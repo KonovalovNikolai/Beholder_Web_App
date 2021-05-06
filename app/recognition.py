@@ -1,7 +1,9 @@
+import copy
 from threading import Lock
+
 import face_recognition
 import numpy as np
-import copy
+from numba import njit
 
 
 class FaceRecognition:
