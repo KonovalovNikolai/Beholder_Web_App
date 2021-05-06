@@ -1,6 +1,7 @@
 from threading import Lock
 import face_recognition
 import numpy as np
+from numba import njit
 import copy
 
 
@@ -78,6 +79,7 @@ class FaceRecognition:
             del self.known_faces_encodings[index]
         self.mutex.release()
 
+    # @njit
     def __search(self, face_to_compare, known_faces_encodings):
         for i, faces_encoding in enumerate(known_faces_encodings):
             distance = np.linalg.norm(faces_encoding - face_to_compare)
