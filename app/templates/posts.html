@@ -2,22 +2,7 @@
 
 {% block content %}
     <div class="content mb-2">
-    {% if prev_url or next_url %}
-        <nav aria-label="Posts pages">
-            <ul class="pagination">
-                {% if prev_url %}
-                    <li class="page-item">
-                        <a class="page-link" href="{{ prev_url }}">Новее</a>
-                    </li>
-                {% endif %}
-                {% if next_url %}
-                    <li class="page-item">
-                        <a class="page-link" href="{{ next_url }}">Позднее</a>
-                    </li>
-                {% endif %}
-            </ul>
-        </nav>
-    {% endif %}
+    {% include "_navigation.html" %}
 
     {% if not posts %}
             <h1>Здесь будут все записи</h1>

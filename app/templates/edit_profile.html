@@ -25,45 +25,49 @@
 {% block content %}
     <div class="content">
     <h1 class=" mb-5">{{ user.get_fullname() }}: Редактирование профиля.</h1>
-    <div class="row">
-    <div class="column_img center" style="background-color:#aaa;">
-        <img class="border_content ml-2" src="{{ url_for('avatar', filename=user.get_avatar_name()) }}" alt="User avatar"
-         id="avatar">
-    <br>
-    <button class="mt-2" id="new-avatr" data-hystmodal="#myModal">Изменить аватар.</button>
-    <br>
-    </div>
-    <div class="column" style="background-color:#bbb;">
-         <form action="" method="POST">
-        {{ profile_form.hidden_tag() }}
-        {% for field in profile_form if field.name != "csrf_token" %}
-            <p class="m-0">{{ field.label(class = "m-0") }}</p>
-            <p class="mb-2">
-                {{ field }}
-                {% for error in field.errors %}
-                    <span style="color: red;">{{ error }}</span>
+    <div class="row padding">
+        <div class="column_img">
+            <img class="" src="{{ url_for('avatar', filename=user.get_avatar_name()) }}" alt="User avatar"
+                 id="avatar">
+            <br>
+            <button class="mt-2 btn btn-primary" id="new-avatr" data-hystmodal="#myModal">Изменить аватар</button>
+            <button class="mt-2 ml-2 btn btn-danger" id="" data-hystmodal="">Удалить</button>
+            <br>
+        </div>
+        <div class="column_edit">
+            <form action="" method="POST">
+                {{ profile_form.hidden_tag() }}
+                {% for field in profile_form if field.name != "csrf_token" %}
+                    <p class="m-0">{{ field.label(class = "m-0") }}</p>
+                    <p class="mb-2">
+                        {{ field(class = "input_center") }}
+                        {% for error in field.errors %}
+                            <span style="color: red;">{{ error }}</span>
+                        {% endfor %}
+                    </p>
                 {% endfor %}
-            </p>
-        {% endfor %}
+                <p class="but_pos "><input class="btn btn-dark" type="submit" name="{{ profile_form.form_name }}" value="Редактировать"></p>
+            </form>
 
-    </form>
-     <p class="mb-1 but_pos"><input type="submit" name="{{ profile_form.form_name }}" value="Редактировать"></p>
-    </div>
-    </div>
-    <p>Изменить пароль</p>
-    <form action="" method="POST">
-        {{ password_form.hidden_tag() }}
-        {% for field in password_form if field.name != "csrf_token" %}
-            <p>{{ field.label }}</p>
-            <p>
-                {{ field }}
-                {% for error in field.errors %}
-                    <span style="color: red;">{{ error }}</span>
+        </div>
+
+        <div class="column_img margin">
+            <p class="m-0 mb-3">Изменить пароль</p>
+            <form action="" method="POST">
+                {{ password_form.hidden_tag() }}
+                {% for field in password_form if field.name != "csrf_token" %}
+                    <p class="m-0">{{ field.label(class = "m-0") }}</p>
+                    <p class="mb-2">
+                        {{ field(class = "input_center") }}
+                        {% for error in field.errors %}
+                            <span style="color: red;">{{ error }}</span>
+                        {% endfor %}
+                    </p>
                 {% endfor %}
-            </p>
-        {% endfor %}
-        <p><input type="submit" name="{{ password_form.form_name }}" value="Изменить пароль"></p>
-    </form>
+                <p class="mt-3"><input class="btn btn-dark" type="submit" name="{{ password_form.form_name }}" value="Изменить пароль"></p>
+            </form>
+        </div>
+    </div>
 {% endblock %}
 
 {% block scripts %}
