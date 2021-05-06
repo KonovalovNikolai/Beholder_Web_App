@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 
 {% block styles %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/details_table.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/image_slider.css') }}">
+    <link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='css/post/details_table.css') }}">
+    <link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='css/post/image_slider.css') }}">
 {% endblock %}
 
 {% block content %}
@@ -245,8 +245,8 @@
 {% endblock %}
 
 {% block scripts %}
-    <script src="{{ url_for('static', filename='js/prove_student.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/image_slider.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/table.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/excel_download.js') }}"></script>
+    <script type="application/javascript" src="{{ url_for('.static', filename='js/post/prove_student.js') }}"></script>
+    <script type="application/javascript" src="{{ url_for('.static', filename='js/post/image_slider.js') }}"></script>
+    <script type="application/javascript" src="{{ url_for('.static', filename='js/post/table.js') }}"></script>
+    <script type="application/javascript" src="{{ url_for('static', filename='js/post/excel_download.js') }}"></script>
 {% endblock %}

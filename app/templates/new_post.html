@@ -1,10 +1,11 @@
 {% extends "base.html" %}
 
 {% block styles %}
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.7.1/min/dropzone.min.css">
+    <link type="text/css" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/dropzone@5.9.2/dist/min/dropzone.min.css"
+          integrity="sha256-n/Cuyrm+v15Nim0mJ2ZrElHlCk8raJs/57WeCsIzDr4=" crossorigin="anonymous">
     <link type="text/css" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hystmodal@0.4.4/dist/hystmodal.min.css"
           integrity="sha256-YlRbZigmqdb88tWvxvo2MNM8savNb9UZYyZ8nZcX9qY=" crossorigin="anonymous">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/loader.css') }}">
+    <link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='css/new_post/loader.css') }}">
 {% endblock %}
 
 {% block modalWindow %}
@@ -47,17 +48,10 @@
 {% endblock %}
 
 {% block scripts %}
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.7.1/min/dropzone.min.js"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='js/dropbox.js') }}"></script>
+    <script type="application/javascript" src="https://cdn.jsdelivr.net/npm/dropzone@5.9.2/dist/min/dropzone.min.js"
+            integrity="sha256-3lzOObLg84+1jp/kYCOWwHoz0RX4P0yZAE5PYWWzjJ4=" crossorigin="anonymous"></script>
     <script type="application/javascript" src="https://cdn.jsdelivr.net/npm/hystmodal@0.4.4/dist/hystmodal.min.js"
             integrity="sha256-J/tLORlSjPV0eY9TJriCBECEVi2/reNXbJS4SbZsm7w=" crossorigin="anonymous"></script>
-    <script>
-        const myModal = new HystModal({
-            linkAttributeName: "data-hystmodal",
-            closeOnOverlay: false,
-            closeOnEsc: false,
-            closeOnButton: false
-            // настройки (не обязательно), см. API
-        });
-    </script>
+
+    <script type="application/javascript" src="{{ url_for('static', filename='js/new_post/dropbox.js') }}"></script>
 {% endblock %}
