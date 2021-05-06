@@ -6,18 +6,19 @@
 {% endblock %}
 
 {% block content %}
+    <div class="content content_margin mb-4">
     {% include '_post_header.html' %}
-    <div>
+    <div class="my-3">
         <h2>Аудитория: {{ post.room }},</h2>
         <h2>Занятие: {{ post.lesson }}.</h2>
         <h2>Заметка: {{ post.notes }}</h2>
     </div>
 
     <!-- Основной блок слайдера -->
-    <div class="slider">
+    <div class="slider no_dec mb-3">
 
         {% for image in post.get_images() %}
-            <div class="item">
+            <div class="item ">
                 <img src="{{ url_for('static', filename=image.get_path(to_static=True)) }}" alt="">
             </div>
         {% endfor %}
@@ -29,7 +30,7 @@
 
     {% if current_user.is_student() %}
         {% if post.check_student(current_user.get_student().id) %}
-            <div class="alert alert-success" role="alert">
+            <div class="alert alert-success mb-3" role="alert">
                 <h4 class="alert-heading">Вы были отмечены!</h4>
                 <p>Вы были отмечены на этом занятии.</p>
             </div>
@@ -160,7 +161,7 @@
     {% endif %}
 
     <p>Экспортировать запись в Exel</p>
-
+    </div>
 {% endblock %}
 
 {% block scripts %}

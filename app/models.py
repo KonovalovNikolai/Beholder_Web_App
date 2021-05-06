@@ -321,7 +321,6 @@ class Post(db.Model):
 
     def check_student(self, student_id: int):
         res = self.journals.filter(Journal.student_id == student_id).first()
-        print(res.student_id)
         if res:
             return True
         return False

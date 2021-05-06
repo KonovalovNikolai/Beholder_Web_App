@@ -72,8 +72,8 @@
                 {% include '_post.html' %}
             </div>
         {% endfor %}
-        <div class="content_margin center mb-2 link_all_div no_dec border">
-            <a class="click_link btn btn-outline-info btn-block content_post" href="{{ url_for("user_posts", user_id=user.id) }}">Показать больше</a>
+        <div class="content_margin mb-2 post_m pt-0 pb-0">
+            <a class="btn btn-outline-info btn-block" href="{{ url_for("user_posts", user_id=user.id) }}">Показать больше</a>
         </div>
     {% endif %}
 
