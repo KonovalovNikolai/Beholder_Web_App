@@ -1,26 +1,10 @@
-var cropper = '';
-var file = '';
+let cropper = '';
+let file = '';
 
-$(document).ready(function () {
-    $("#cropperfile")
-        .change(function (e) {
-            if (file = this.files[0]) {
-                var oFReader = new FileReader();
-                oFReader.readAsDataURL(file);
-                oFReader.onload = function () {
-                    if (cropper != '') {
-                        cropper.destroy()
-                    }
-                    $("#cropper-img").attr('src', this.result);
-                    $('#cropper-img').addClass('ready');
-                    initCropper();
-                }
-            }
-        });
-});
+$(document).ready();
 
 function initCropper() {
-    var vEl = document.getElementById('cropper-img');
+    let vEl = document.getElementById('cropper-img');
     cropper = new Cropper(vEl, {
         viewMode: 3,
         dragMode: 'move',
@@ -32,11 +16,11 @@ function initCropper() {
         zoomOnWheel: true,
         guides: true,
         highlight: true,
-        ready: function (e) {
-            var cropper = this.cropper;
+        ready: function () {
+            let cropper = this.cropper;
             cropper.zoomTo(0);
 
-            var imageData = cropper.getImageData();
+            let imageData = cropper.getImageData();
 
             $(".cr-slider-wrap").show();
         }
@@ -45,21 +29,21 @@ function initCropper() {
 
 $("#crop").click(function () {
     $(this).attr('disabled', 'disabled');
-    if (cropper == '') {
+    if (cropper === '') {
         alert('Загрузите фото');
         $(this).attr('disabled', 'disabled');
         return false;
     }
 
-    canvas = cropper.getCroppedCanvas({
+    let canvas = cropper.getCroppedCanvas({
         width: 250,
         height: 250,
     });
 
-    var url = $(this).attr('action');
+    let url = $(this).attr('action');
 
     canvas.toBlob(function (blob) {
-        var data = new FormData();
+        let data = new FormData();
         data.append("file", blob, 'avatar.png');
 
         $.ajax({
@@ -69,7 +53,7 @@ $("#crop").click(function () {
             data: data,
             processData: false,
             contentType: false,
-            success: function (response) {
+            success: function () {
                 location.reload();
             },
             error: function (response) {
