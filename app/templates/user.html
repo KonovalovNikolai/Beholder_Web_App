@@ -29,30 +29,30 @@
 
 
 
-        <!--<table class="mt-5">
-            <tr valign="top">
-                <td class="p-0 holder m-0">
-                    <img class="" src="{{ url_for('avatar', filename=user.get_avatar_name()) }}"
-                         alt="User avatar" id="avatar">
-                    {% if current_user.is_can_edit(user) %}
-                        <div class="block">
-                        <a href="{{ url_for("edit_profile", user_id=user.id) }}"><img width="32"
-                                                                                      src="../static/img/svg_icons/pencil-square.svg"></a>
-                    {% endif %}
-                    </div>
-                </td>
-
-                <td height="100%" class="p-0 pl-5">
-                    <div class=" p-3 about_user">
-                        <h2 class="au_text"> Email:
-                            <a href="mailto:{{ user.email }}">{{ user.email }}</a>
-                        </h2>
-                        <h2 class="au_text">Роль: {{ user.get_role() }}</h2>
-                    </div>
-                </td>
-
-            </tr>
-        </table>-->
+{#        <!--<table class="mt-5">#}
+{#            <tr valign="top">#}
+{#                <td class="p-0 holder m-0">#}
+{#                    <img class="" src="{{ url_for('avatar', filename=user.get_avatar_name()) }}"#}
+{#                         alt="User avatar" id="avatar">#}
+{#                    {% if current_user.is_can_edit(user) %}#}
+{#                        <div class="block">#}
+{#                        <a href="{{ url_for("edit_profile", user_id=user.id) }}"><img width="32"#}
+{#                                                                                      src="../static/img/svg_icons/pencil-square.svg"></a>#}
+{#                    {% endif %}#}
+{#                    </div>#}
+{#                </td>#}
+{##}
+{#                <td height="100%" class="p-0 pl-5">#}
+{#                    <div class=" p-3 about_user">#}
+{#                        <h2 class="au_text"> Email:#}
+{#                            <a href="mailto:{{ user.email }}">{{ user.email }}</a>#}
+{#                        </h2>#}
+{#                        <h2 class="au_text">Роль: {{ user.get_role() }}</h2>#}
+{#                    </div>#}
+{#                </td>#}
+{##}
+{#            </tr>#}
+{#        </table>-->#}
     </div>
     <div class="content content_margin">
         {% if not user.is_student() %}
