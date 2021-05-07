@@ -351,6 +351,11 @@ class Post(db.Model):
             return None
         return "./app/" + app.config['EXCEL_FILES_PATH'] + self.excel_file_name
 
+    def get_excel_path(self):
+        if not self.excel_file_name:
+            return None
+        return "./app/" + app.config['EXCEL_FILES_PATH'] + self.excel_file_name
+
     def get_first_image(self):
         return self.images.first()
 
