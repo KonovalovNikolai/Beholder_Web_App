@@ -80,7 +80,6 @@ $(document).ready(function () {
             error: function (response) {
                 alert('Что-то пошло не так.\nПопробуйте ещё раз позже.');
                 $(button).removeAttr('disabled');
-                 $(button).dis
             }
         });
     });

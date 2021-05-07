@@ -6,150 +6,152 @@
 {% endblock %}
 
 {% block content %}
-    {% include '_post_header.html' %}
-    <div>
-        <h2>Аудитория: {{ post.room }},</h2>
-        <h2>Занятие: {{ post.lesson }}.</h2>
-        <h2>Заметка: {{ post.notes }}</h2>
-    </div>
+    <div class="content content_margin mb-2">
+        {% include '_post_header.html' %}
+        <div>
+            <h2>Аудитория: {{ post.room }},</h2>
+            <h2>Занятие: {{ post.lesson }}.</h2>
+            <h2>Заметка: {{ post.notes }}</h2>
+        </div>
 
-    <!-- Основной блок слайдера -->
-    <div class="slider">
+        <!-- Основной блок слайдера -->
+        <div class="slider">
 
-        {% for image in post.get_images() %}
-            <div class="item">
-                <img src="{{ url_for('static', filename=image.get_path(to_static=True)) }}" alt="">
-            </div>
-        {% endfor %}
+            {% for image in post.get_images() %}
+                <div class="item">
+                    <img src="{{ url_for('static', filename=image.get_path(to_static=True)) }}" alt="">
+                </div>
+            {% endfor %}
 
-        <!-- Кнопки-стрелочки -->
-        <a class="previous" onclick="previousSlide()">&#10094;</a>
-        <a class="next" onclick="nextSlide()">&#10095;</a>
-    </div>
+            <!-- Кнопки-стрелочки -->
+            <a class="previous" onclick="previousSlide()">&#10094;</a>
+            <a class="next" onclick="nextSlide()">&#10095;</a>
+        </div>
 
-    {% if current_user.is_student() %}
-        {% if post.check_student(current_user.get_student().id) %}
-            <div class="alert alert-success" role="alert">
-                <h4 class="alert-heading">Вы были отмечены!</h4>
-                <p>Вы были отмечены на этом занятии.</p>
-            </div>
-        {% elif current_user.check_request(post.id) %}
-            {# Студент уже отправил запрос - серое окно #}
-            <div class="alert alert-secondary" role="alert">
-                <h4 class="alert-heading">Запрос отправлен.</h4>
-                <p>Вы будете отмечены, если ваш запрос будет принят.</p>
-                <button id="cancel-request" class="request-button" data-id="{{ current_user.id }}"
-                        data-url="{{ url_for('cancel_request', post_id=post.id) }}" data-action="reload">
-                    Отменить запрос.
-                </button>
-            </div>
-        {% else %}
-            {# Студент не был отмечен - красное окно #}
-            <div class="alert alert-danger" role="alert">
-                <h4 class="alert-heading">Вы не отмечены.</h4>
-                <p>Вы не отмечены на этом занятии. Вы можете отправить запрос. Вы будете отмечены, если ваш
-                    запрос будет принят.</p>
-                <button id="send-request" class="request-button" data-id="{{ current_user.id }}"
-                        data-url="{{ url_for('take_request', post_id=post.id) }}" data-action="reload">
-                    Попросить отметить.
-                </button>
-            </div>
-        {% endif %}
-    {% endif %}
-
-    <details open="">
-        <summary>Отмеченные студенты</summary>
-        {% with visitors = post.get_visitors() %}
-            {% if not visitors %}
-                <h2>Нет отмеченных посетителей.</h2>
+        {% if current_user.is_student() %}
+            {% if post.check_student(current_user.get_student().id) %}
+                <div class="alert alert-success" role="alert">
+                    <h4 class="alert-heading">Вы были отмечены!</h4>
+                    <p>Вы были отмечены на этом занятии.</p>
+                </div>
+            {% elif current_user.check_request(post.id) %}
+                {# Студент уже отправил запрос - серое окно #}
+                <div class="alert alert-secondary" role="alert">
+                    <h4 class="alert-heading">Запрос отправлен.</h4>
+                    <p>Вы будете отмечены, если ваш запрос будет принят.</p>
+                    <button type="button" id="cancel-request" class="request-button btn btn-secondary"
+                            data-id="{{ current_user.id }}"
+                            data-url="{{ url_for('cancel_request', post_id=post.id) }}" data-action="reload">
+                        Отменить запрос.
+                    </button>
+                </div>
             {% else %}
-                <input type="text" class="table-search form-control pull-right" id="request-search"
-                       placeholder="Поиск по таблице">
-                <table id="visitors-table" class="searchable-table">
-                    <thead>
-                    <tr align="center">
-                        <th>Фото</th>
-                        <th class="sortable">ФИО</th>
-                        <th class="sortable">Точность</th>
-                        <th class="sortable">Подтверждён</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for visitor in visitors %}
-                        <tr align="center">
-                            <td>
-                                <a href="{{ url_for('profile', user_id=visitor.student.user.id) }}" target="_blank">
-                                    <img src="{{ url_for('avatar', filename=visitor.student.user.get_avatar_name()) }}"
-                                         width="50">
-                                </a>
-                            </td>
-                            <td class="fullname">{{ visitor.student.user.get_fullname() }}</td>
-                            <td>{{ visitor.get_distance() }}</td>
-                            {% if visitor.lecturer_proved == 0 %}
-                                <td class="prove-td">&#9746;</td>
-                                {% if current_user.is_can_edit(post) %}
-                                    <td>
-                                        <button class="prove-button" data-id="{{ visitor.student_id }}"
-                                                data-url="{{ url_for('approve_student', journal_id=visitor.id) }}">
-                                            &#9745;
-                                        </button>
-                                    </td>
-                                {% endif %}
-                            {% else %}
-                                <td class="prove-td">&#9745;</td>
-                            {% endif %}
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
+                {# Студент не был отмечен - красное окно #}
+                <div class="alert alert-danger" role="alert">
+                    <h4 class="alert-heading">Вы не отмечены.</h4>
+                    <p>Вы не отмечены на этом занятии. Вы можете отправить запрос. Вы будете отмечены, если ваш
+                        запрос будет принят.</p>
+                    <button type="button" id="send-request" class="request-button btn btn-danger"
+                            data-id="{{ current_user.id }}"
+                            data-url="{{ url_for('take_request', post_id=post.id) }}" data-action="reload">
+                        Попросить отметить.
+                    </button>
+                </div>
             {% endif %}
-        {% endwith %}
-    </details>
-    {% if current_user.is_can_edit(post) %}
-        <details>
-            <summary>Просят отметить</summary>
-            {% with requests = post.get_requests() %}
-                {% if not requests %}
-                    <h2 id="no-request-message">Нет запросов.</h2>
+        {% endif %}
+
+        <details open="">
+            <summary>Отмеченные студенты</summary>
+            {% with visitors = post.get_visitors() %}
+                {% if not visitors %}
+                    <h2>Нет отмеченных посетителей.</h2>
                 {% else %}
-                    <h2 id="no-request-message" style="display: none;">Нет запросов.</h2>
-                    <input type="text" class="table-search form-control pull-right" id="request-search"
+                    <h2 id="no-visitors-message" style="display: none;">Нет отмеченных посетителей.</h2>
+                    <input type="text" class="table-search form-control pull-right" id="visitors-search"
                            placeholder="Поиск по таблице">
-                    <button id="accept-selected">Принять выделенные запросы</button>
-                    <button id="cancel-selected">Отклонить выделенные запросы</button>
-                    <table id="request-table" class="searchable-table">
+                    <table id="visitors-table" class="searchable-table table table-striped" align="center">
                         <thead>
                         <tr align="center">
-                            <th><input type="checkbox" id="header-checkbox"/></th>
-                            <th>Фото</th>
-                            <th>ФИО</th>
-                            <th>Время</th>
+                            <th scope="col">Фото</th>
+                            <th scope="col" class="sortable">ФИО</th>
+                            <th scope="col" class="sortable">Точность</th>
+                            <th scope="col" class="sortable">Подтверждён</th>
+                            {% if current_user.is_can_edit(post) %}
+                                <th scope="col"></th>
+                                <th scope="col"></th>
+                            {% endif %}
                         </tr>
                         </thead>
                         <tbody>
-                        {% for request in requests %}
-                            <tr align="center" class="request-row">
-                                <td><input type="checkbox" class="body-checkbox"/></td>
+                        {% for visitor in visitors %}
+                            <tr align="center">
                                 <td>
-                                    <a href="{{ url_for('profile', user_id=request.user.id) }}" target="_blank">
-                                        <img src="{{ url_for('avatar', filename=request.user.get_avatar_name()) }}"
+                                    <a href="{{ url_for('profile', user_id=visitor.student.user.id) }}" target="_blank">
+                                        <img src="{{ url_for('avatar', filename=visitor.student.user.get_avatar_name()) }}"
                                              width="50">
                                     </a>
                                 </td>
-                                <td class="fullname">{{ request.user.get_fullname() }}</td>
-                                <td>{{ request.get_humanized_time() }}</td>
-                                <td class="button-td">
-                                    <button class="request-button accept-button" data-id="{{ request.user.id }}"
-                                            data-url="{{ url_for('accept_request', post_id=post.id) }}"
-                                            data-action="delete">
-                                        &#9745;
-                                    </button>
-                                    <button class="request-button cancel-button" data-id="{{ request.user.id }}"
-                                            data-url="{{ url_for('cancel_request', post_id=post.id) }}"
-                                            data-action="delete">
-                                        &#9746;
-                                    </button>
-                                </td>
+                                <td class="fullname">{{ visitor.student.user.get_fullname() }}</td>
+                                <td>{{ visitor.get_distance() }}</td>
+
+                                {# Пользователь может изменять запись? #}
+                                {% if current_user.is_can_edit(post) %}
+                                    {# Да #}
+                                    <td class="prove-td">
+                                        <img class="disapproved-img" width="24" src="../static/img/svg_icons/x.svg" alt=""
+                                                {% if visitor.lecturer_proved != 0 %}
+                                                    style="display: none;"
+                                                {% endif %}>
+                                        <img class="approved-img" width="24" src="../static/img/svg_icons/check.svg" alt=""
+                                                {% if visitor.lecturer_proved == 0 %}
+                                                    style="display: none;"
+                                                {% endif %}>
+                                    </td>
+                                    <td>
+                                        {# Кнопка подтвердить #}
+                                        <button type="button" class="prove-button btn btn-success"
+                                                data-id="{{ visitor.student_id }}"
+                                                data-url="{{ url_for('approve_journal', journal_id=visitor.id) }}"
+                                                data-target=".approved-img"
+                                                {% if visitor.lecturer_proved != 0 %}
+                                                style="display: none;"
+                                                {% endif %}>
+                                            <img width="24" src="../static/img/svg_icons/check.svg" alt="">
+                                        </button>
+                                        {# Кнопка отозвать подтверждение #}
+                                        <button type="button" class="prove-button btn btn-danger"
+                                                data-id="{{ visitor.student_id }}"
+                                                data-url="{{ url_for('disapprove_journal', journal_id=visitor.id) }}"
+                                                data-target=".disapproved-img"
+                                                {% if visitor.lecturer_proved == 0 %}
+                                                style="display: none;"
+                                                {% endif %}>
+                                            <img width="24" src="../static/img/svg_icons/x.svg" alt="">
+                                        </button>
+                                    </td>
+                                    <td>
+                                        {# Кнопка удаления записи #}
+                                        <button type="button" class="delete-journal-button btn btn-danger"
+                                                data-url="{{ url_for('delete_journal', journal_id=visitor.id) }}">
+                                            <img width="24" src="../static/img/svg_icons/x.svg" alt="">
+                                        </button>
+                                    </td>
+                                {% else %}
+                                    {# Пользователь не может редактировать #}
+                                    {# Посетитель подтверждён? #}
+                                    {% if visitor.lecturer_proved == 0 %}
+                                        {# Нет #}
+                                        <td class="prove-td">
+                                            <img width="24" src="../static/img/svg_icons/x.svg" alt="">
+                                        </td>
+                                    {% else %}
+                                        {# Да #}
+                                        <td class="prove-td">
+                                            <img width="24" src="../static/img/svg_icons/check.svg" alt="">
+                                        </td>
+                                    {% endif %}
+                                {% endif %}
+
                             </tr>
                         {% endfor %}
                         </tbody>
@@ -157,13 +159,69 @@
                 {% endif %}
             {% endwith %}
         </details>
-    {% endif %}
+        {# Просьбы отметить. Видны только тем, кто может редактировать страницу. #}
+        {% if current_user.is_can_edit(post) %}
+            <details>
+                <summary>Просят отметить</summary>
+                {% with requests = post.get_requests() %}
+                    {% if not requests %}
+                        <h2 id="no-request-message">Нет запросов.</h2>
+                    {% else %}
+                        <h2 id="no-request-message" style="display: none;">Нет запросов.</h2>
+                        <input type="text" class="table-search form-control pull-right" id="request-search"
+                               placeholder="Поиск по таблице">
+                        <button id="accept-selected">Принять выделенные запросы</button>
+                        <button id="cancel-selected">Отклонить выделенные запросы</button>
+                        <table id="request-table" class="searchable-table table table-striped">
+                            <thead>
+                            <tr align="center">
+                                <th scope="col"><input type="checkbox" id="header-checkbox"/></th>
+                                <th scope="col">Фото</th>
+                                <th scope="col">ФИО</th>
+                                <th scope="col">Время</th>
+                                <th scope="col"></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for request in requests %}
+                                <tr align="center" class="request-row">
+                                    <th scope="row"><input type="checkbox" class="body-checkbox"/></th>
+                                    <td>
+                                        <a href="{{ url_for('profile', user_id=request.user.id) }}" target="_blank">
+                                            <img src="{{ url_for('avatar', filename=request.user.get_avatar_name()) }}"
+                                                 width="50">
+                                        </a>
+                                    </td>
+                                    <td class="fullname">{{ request.user.get_fullname() }}</td>
+                                    <td>{{ request.get_humanized_time() }}</td>
+                                    <td class="button-td">
+                                        <button type="button" class="request-button accept-button btn btn-success"
+                                                data-id="{{ request.user.id }}"
+                                                data-url="{{ url_for('accept_request', post_id=post.id) }}"
+                                                data-action="delete">
+                                            <img width="24" src="../static/img/svg_icons/check.svg" alt="">
+                                        </button>
+                                        <button type="button" class="request-button cancel-button btn btn-danger"
+                                                data-id="{{ request.user.id }}"
+                                                data-url="{{ url_for('cancel_request', post_id=post.id) }}"
+                                                data-action="delete">
+                                            <img width="24" src="../static/img/svg_icons/x.svg" alt="">
+                                        </button>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    {% endif %}
+                {% endwith %}
+            </details>
+        {% endif %}
 
-    <button id="excel-download" class="btn btn-primary" type="button"
-            data-url="{{ url_for('download_excel', post_id=post.id) }}">
-        Экспортировать запись в Exel
-    </button>
-
+        <button id="excel-download" class="btn btn-primary" type="button"
+                data-url="{{ url_for('download_excel', post_id=post.id) }}">
+            Экспортировать запись в Exel
+        </button>
+    </div>
 {% endblock %}
 
 {% block scripts %}

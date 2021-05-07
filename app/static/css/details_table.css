@@ -11,7 +11,7 @@ summary::marker {
 }
 
 summary {
-    padding: 0em 1.5em .3em .6em;
+    padding: .0em 1.5em .3em .0em;
     display: inline-block;
     font-size: 1.4em;
     cursor: pointer;
@@ -58,6 +58,10 @@ details {
 
 #visitors-table .sortable {
     cursor: pointer;
+}
+
+td {
+    vertical-align: middle !important;
 }
 
 table td,

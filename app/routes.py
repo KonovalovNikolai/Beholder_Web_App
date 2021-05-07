@@ -7,8 +7,7 @@ from werkzeug.utils import secure_filename
 
 from app import app, db, recognition
 from app.forms import ChangePasswordForm, EditProfileForm, LoginForm, CreatePostForm
-from app.models import Avatar, User, Post, Image, Request, Journal
-
+from app.models import Avatar, User, Post, Image, Request, Journal, Student
 
 # from app.tasks import recognize_task
 from app.tasks import import_to_excel
@@ -203,8 +202,25 @@ def reject_avatar(avatar_id):
     return 'Ok', 201
 
 
-@app.route('/api/approve_student/<int:journal_id>', methods=['POST'])
-def approve_student(journal_id):
+@app.route('/api/delete_journal/<int:journal_id>', methods=['DELETE'])
+def delete_journal(journal_id):
+    if current_user.is_anonymous or current_user.is_student():
+        abort(403)
+    journal = Journal.query.get(journal_id)
+
+    if not journal:
+        abort(400)
+    if not current_user.is_can_edit(journal.post):
+        abort(400)
+
+    journal.post.changed = 0
+    db.session.delete(journal)
+    db.session.commit()
+    return 'Ok', 202
+
+
+@app.route('/api/approve_journal/<int:journal_id>', methods=['POST'])
+def approve_journal(journal_id):
     if current_user.is_anonymous or current_user.is_student():
         abort(403)
 
@@ -212,17 +228,44 @@ def approve_student(journal_id):
         abort(400)
     student_id = request.form.get('id', type=int)
 
-    student = User.query.get(student_id)
+    student = Student.query.get(student_id)
     journal = Journal.query.get(journal_id)
 
+    if not student:
+        abort(400)
     if not journal or journal.student_id != student.id:
         abort(400)
-
     if not current_user.is_can_edit(journal.post):
         abort(400)
 
     journal.post.changed = 0
     journal.lecturer_proved = 1
+    db.session.commit()
+
+    return 'Ok', 202
+
+
+@app.route('/api/disapprove_journal/<int:journal_id>', methods=['POST'])
+def disapprove_journal(journal_id):
+    if current_user.is_anonymous or current_user.is_student():
+        abort(403)
+
+    if 'id' not in request.form:
+        abort(400)
+    student_id = request.form.get('id', type=int)
+
+    student = Student.query.get(student_id)
+    journal = Journal.query.get(journal_id)
+
+    if not student:
+        abort(400)
+    if not journal or journal.student_id != student.id:
+        abort(400)
+    if not current_user.is_can_edit(journal.post):
+        abort(400)
+
+    journal.post.changed = 0
+    journal.lecturer_proved = 0
     db.session.commit()
 
     return 'Ok', 202
@@ -429,5 +472,6 @@ def moderation():
     next_url = url_for("moderation", page=avatars.next_num) if avatars.has_next else None
     prev_url = url_for("moderation", page=avatars.prev_num) if avatars.has_prev else None
 
-    return render_template('moderation.html', title='Модерация - проверка изображений', avatars=avatars.items, next_url=next_url,
+    return render_template('moderation.html', title='Модерация - проверка изображений', avatars=avatars.items,
+                           next_url=next_url,
                            prev_url=prev_url)
