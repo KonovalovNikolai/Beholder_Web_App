@@ -2,6 +2,8 @@ import imghdr
 import json
 import uuid
 import os
+import uuid
+
 import datetime
 from flask import abort, flash, jsonify, redirect, render_template, request, send_from_directory, url_for
 from flask_login import current_user, login_required, login_user, logout_user
@@ -10,6 +12,7 @@ from werkzeug.utils import secure_filename
 
 from app import app, db, recognition
 from app.forms import ChangePasswordForm, CreatePostForm, EditProfileForm, LoginForm
+
 from app.models import Avatar, Image, Journal, Post, Request, Student, User, Message
 # from app.tasks import recognize_task
 from app.tasks import import_to_excel
