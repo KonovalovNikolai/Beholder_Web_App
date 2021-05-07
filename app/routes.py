@@ -413,8 +413,13 @@ def edit_profile(user_id):
 
     user.fill_form(profile_form)
 
+    for field in password_form:
+        if field.errors:
+            return render_template('edit_profile.html', title='Редактирование профиля', user=user,
+                                   profile_form=profile_form, password_form=password_form, active=True)
+
     return render_template('edit_profile.html', title='Редактирование профиля', user=user,
-                           profile_form=profile_form, password_form=password_form)
+                           profile_form=profile_form, password_form=password_form, active=False)
 
 
 @app.route('/user/<int:user_id>/posts')

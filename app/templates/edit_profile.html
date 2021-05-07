@@ -49,8 +49,6 @@
             </div>
             <div style=" width: 300px;" class="btn-group" role="group" aria-label="Basic example">
 
-
-
                 <button type="button" class="mt-2 btn btn-primary" style="" id="new-avatr"
                         data-hystmodal="#myModal">Изменить аватар
                 </button>
@@ -64,14 +62,14 @@
 
             <ul class="nav nav-tabs">
                 <li class="nav-item">
-                    <a class="nav-link active" data-toggle="tab" href="#pers_info">Личная информация</a>
+                    <a class="nav-link {% if not active %} active {% endif %}" data-toggle="tab" href="#pers_info">Личная информация</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" data-toggle="tab" href="#pass_edit">Изменить пароль</a>
+                    <a class="nav-link {% if active %} active {% endif %}" data-toggle="tab" href="#pass_edit">Изменить пароль</a>
                 </li>
             </ul>
             <div class="tab-content">
-                <div class="tab-pane fade border_content padding_edit padding show active" id="pers_info">
+                <div class="tab-pane fade border_content padding_edit padding {% if not active %} show active {% endif %}" id="pers_info">
                     <form action="" method="POST">
                     <div class="flex">
                         {{ profile_form.hidden_tag() }}
@@ -92,9 +90,7 @@
                                            value="Редактировать"></p>
                     </form>
                 </div>
-                <div class="tab-pane fade border_content padding_edit padding" id="pass_edit">
-
-
+                <div class="tab-pane fade border_content padding_edit padding {% if active %} show active {% endif %}" id="pass_edit">
                     <form action="" method="POST">
                     <div class="flex">
                         {{ password_form.hidden_tag() }}
