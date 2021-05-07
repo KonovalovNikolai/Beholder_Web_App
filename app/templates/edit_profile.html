@@ -40,83 +40,89 @@
 
 {% block content %}
     <div class="content">
-    <h1 class=" mb-5" id="user-name" data-role="{{ user.type }}">{{ user.get_fullname() }}: Редактирование профиля.</h1>
-    <div class="row padding">
-        <div class="column_img_edit">
-            <div>
-                <img width="300px" style="background-size: contain" src="{{ url_for('avatar', filename=user.get_avatar_name()) }}" alt="User avatar"
-                     id="avatar">
-            </div>
-            <div style=" width: 300px;" class="btn-group" role="group" aria-label="Basic example">
-
-                <button type="button" class="mt-2 btn btn-primary" style="" id="new-avatr"
-                        data-hystmodal="#myModal">Изменить аватар
-                </button>
-
-                <button type="button" class="mt-2 btn btn-danger but_pos px-0" style="" id="" data-hystmodal=""><i
-                        class="bi bi-trash"></i>
-                </button>
-            </div>
-        </div>
-        <div class="column_edit">
-
-            <ul class="nav nav-tabs">
-                <li class="nav-item">
-                    <a class="nav-link {% if not active %} active {% endif %}" data-toggle="tab" href="#pers_info">Личная информация</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {% if active %} active {% endif %}" data-toggle="tab" href="#pass_edit">Изменить пароль</a>
-                </li>
-            </ul>
-            <div class="tab-content">
-                <div class="tab-pane fade border_content padding_edit padding {% if not active %} show active {% endif %}" id="pers_info">
-                    <form action="" method="POST">
-                    <div class="flex">
-                        {{ profile_form.hidden_tag() }}
-                        {% for field in profile_form if field.name != "csrf_token" %}
-                            <div class="mr-4">
-                            <p class="m-0 ">{{ field.label(class = "m-0") }}</p>
-                            <p class="mb-2">
-                                {{ field(class = "input_center login_field", placeholder=field.label.text) }}
-                                {% for error in field.errors %}
-                                    <span style="color: red;">{{ error }}</span>
-                                {% endfor %}
-                            </p>
-                            </div>
-                        {% endfor %}
-                    </div>
-                        <p class="mt-3"><input class="btn btn-dark but_edit" type="submit"
-                                           name="{{ profile_form.form_name }}"
-                                           value="Редактировать"></p>
-                    </form>
+        <h1 class=" mb-5" id="user-name" data-role="{{ user.type }}">{{ user.get_fullname() }}: Редактирование
+            профиля.</h1>
+        <div class="row padding">
+            <div class="column_img_edit">
+                <div>
+                    <img width="300px" style="background-size: contain"
+                         src="{{ url_for('avatar', filename=user.get_avatar_name()) }}" alt="User avatar"
+                         id="avatar">
                 </div>
-                <div class="tab-pane fade border_content padding_edit padding {% if active %} show active {% endif %}" id="pass_edit">
-                    <form action="" method="POST">
-                    <div class="flex">
-                        {{ password_form.hidden_tag() }}
-                        {% for field in password_form if field.name != "csrf_token" %}
-                            <div class="mr-4">
-                            <p class="m-0">{{ field.label(class = "m-0 ") }}</p>
-                            <p class="mb-2">
-                                {{ field(class = "input_center login_field", placeholder=field.label.text) }}
-                                {% for error in field.errors %}
-                                    <span style="color: red;">{{ error }}</span>
-                                {% endfor %}
-                            </p>
-                            </div>
-                        {% endfor %}
-                    </div>
-                        <p class="mt-3"><input class="btn btn-dark but_edit" type="submit"
-                                               name="{{ password_form.form_name }}"
-                                               value="Изменить пароль"></p>
-                    </form>
+                <div style=" width: 300px;" class="btn-group" role="group" aria-label="Basic example">
 
+                    <button type="button" class="mt-2 btn btn-primary" style="" id="new-avatr"
+                            data-hystmodal="#myModal">Изменить аватар
+                    </button>
+
+                    <button type="button" class="mt-2 btn btn-danger but_pos px-0" style="" id="" data-hystmodal=""><i
+                            class="bi bi-trash"></i>
+                    </button>
                 </div>
             </div>
+            <div class="column_edit">
+
+                <ul class="nav nav-tabs">
+                    <li class="nav-item">
+                        <a class="nav-link {% if not active %} active {% endif %}" data-toggle="tab" href="#pers_info">Личная
+                            информация</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if active %} active {% endif %}" data-toggle="tab" href="#pass_edit">Изменить
+                            пароль</a>
+                    </li>
+                </ul>
+                <div class="tab-content">
+                    <div class="tab-pane fade border_content padding_edit padding {% if not active %} show active {% endif %}"
+                         id="pers_info">
+                        <form action="" method="POST">
+                            <div class="flex">
+                                {{ profile_form.hidden_tag() }}
+                                {% for field in profile_form if field.name != "csrf_token" %}
+                                    <div class="mr-4">
+                                        <p class="m-0 ">{{ field.label(class = "m-0") }}</p>
+                                        <p class="mb-2">
+                                            {{ field(class = "input_center login_field", placeholder=field.label.text) }}
+                                            {% for error in field.errors %}
+                                                <span style="color: red;">{{ error }}</span>
+                                            {% endfor %}
+                                        </p>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <p class="mt-3"><input class="btn btn-dark but_edit" type="submit"
+                                                   name="{{ profile_form.form_name }}"
+                                                   value="Редактировать"></p>
+                        </form>
+                    </div>
+                    <div class="tab-pane fade border_content padding_edit padding {% if active %} show active {% endif %}"
+                         id="pass_edit">
+                        <form action="" method="POST">
+                            <div class="flex">
+                                {{ password_form.hidden_tag() }}
+                                {% for field in password_form if field.name != "csrf_token" %}
+                                    <div class="mr-4">
+                                        <p class="m-0">{{ field.label(class = "m-0 ") }}</p>
+                                        <p class="mb-2">
+                                            {{ field(class = "input_center login_field", placeholder=field.label.text) }}
+                                            {% for error in field.errors %}
+                                                <span style="color: red;">{{ error }}</span>
+                                            {% endfor %}
+                                        </p>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <p class="mt-3"><input class="btn btn-dark but_edit" type="submit"
+                                                   name="{{ password_form.form_name }}"
+                                                   value="Изменить пароль"></p>
+                        </form>
+
+                    </div>
+                </div>
 
 
+            </div>
         </div>
-
 
     </div>
 {% endblock %}
@@ -139,5 +145,4 @@
             closeOnButton: false
         });
     </script>
-    </div>
 {% endblock %}

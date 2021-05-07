@@ -27,50 +27,51 @@
             </div>
             <div class="col-sm">
                 <div class="ml-4">
-                <h1 class="m-0 mb-5">Title</h1>
+                    <h1 class="m-0 mb-5">Title</h1>
 
 
-                {% if prev_url or next_url %}
-                    <nav aria-label="Posts pages">
-                        <ul class="pagination">
-                            {% if prev_url %}
-                                <li class="page-item">
-                                    <a class="page-link" href="{{ prev_url }}">Новее</a>
-                                </li>
-                            {% endif %}
-                            {% if next_url %}
-                                <li class="page-item">
-                                    <a class="page-link" href="{{ next_url }}">Позднее</a>
-                                </li>
-                            {% endif %}
-                        </ul>
-                    </nav>
-                {% endif %}
+                    {% if prev_url or next_url %}
+                        <nav aria-label="Posts pages">
+                            <ul class="pagination">
+                                {% if prev_url %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="{{ prev_url }}">Новее</a>
+                                    </li>
+                                {% endif %}
+                                {% if next_url %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="{{ next_url }}">Позднее</a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    {% endif %}
 
-                {% if not avatars %}
-                    <p>Нет непроверенных фотографий.</p>
-                {% else %}
-                    {% for avatar in avatars %}
-                        <div class="approve-box">
-                            <a class="avatar" href="{{ url_for('avatar', filename=avatar.filename) }}" rel="avatars">
-                                <img src="{{ url_for('avatar', filename=avatar.filename) }}" alt="Аватар"
-                                     width="128px"/>
-                            </a>
-                            <p>Пользователь: {{ avatar.user.get_fullname() }}.</p>
-                            <div class="btn-group" role="group" aria-label="Approve or reject avatar">
-                                <button type="button" class="approveBtn btn btn-success"
-                                        data-url="{{ url_for('approve_avatar', avatar_id=avatar.id) }}">
-                                    &#9745;
-                                </button>
-                                <button type="button" class="approveBtn btn btn-danger"
-                                        data-url="{{ url_for('reject_avatar', avatar_id=avatar.id) }}">
-                                    &#9746;
-                                </button>
+                    {% if not avatars %}
+                        <p>Нет непроверенных фотографий.</p>
+                    {% else %}
+                        {% for avatar in avatars %}
+                            <div class="approve-box">
+                                <a class="avatar" href="{{ url_for('avatar', filename=avatar.filename) }}"
+                                   rel="avatars">
+                                    <img src="{{ url_for('avatar', filename=avatar.filename) }}" alt="Аватар"
+                                         width="128px"/>
+                                </a>
+                                <p>Пользователь: {{ avatar.user.get_fullname() }}.</p>
+                                <div class="btn-group" role="group" aria-label="Approve or reject avatar">
+                                    <button type="button" class="approveBtn btn btn-success"
+                                            data-url="{{ url_for('approve_avatar', avatar_id=avatar.id) }}">
+                                        &#9745;
+                                    </button>
+                                    <button type="button" class="approveBtn btn btn-danger"
+                                            data-url="{{ url_for('reject_avatar', avatar_id=avatar.id) }}">
+                                        &#9746;
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-                        </div>
-                    {% endfor %}
-                {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                </div>
             </div>
         </div>
     </div>
