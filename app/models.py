@@ -76,6 +76,10 @@ class User(UserMixin, db.Model):
             name = '{} {} {}'.format(self.lastname, self.firstname, self.patronymic)
         elif self.lastname and self.firstname:
             name = '{} {}'.format(self.lastname, self.firstname)
+        elif self.firstname and self.patronymic:
+            name = '{} {}'.format(self.firstname, self.patronymic)
+        elif self.firstname:
+            name = self.firstname
 
         if name == '':
             return self.email
@@ -83,7 +87,7 @@ class User(UserMixin, db.Model):
 
     def get_role(self):
         """
-        Получить название роли пользователя, взависимости от его типа.
+        Получить название роли пользователя, в зависимости от его типа.
         Соответствие типов:
             1 - Студент;
             2 - Преподаватель;
