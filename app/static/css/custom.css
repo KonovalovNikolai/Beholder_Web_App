@@ -8,6 +8,7 @@
     border-top: none !important;
     background-color: #FFFFFF;
     outline-offset: 0px;
+    border-radius: 4px;
 
 }
 
@@ -118,7 +119,7 @@
 
 .column {
     float: left;
-    width: 55%;
+    padding: 25px;
     position: relative;
 }
 
@@ -130,7 +131,7 @@
 
 .column_img {
     float: left;
-    width: 40%;
+    width: 350px;
 
 
 }
@@ -145,9 +146,11 @@
 /* Responsive layout - makes the two columns stack on top of each other instead of next to each other */
 @media screen and (max-width: 1000px) {
     .column {
-        width: 100%;
+        min-width: 250px;
         text-align: center;
-        padding: 0;
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: 35px;
     }
 
     .column_img {
@@ -266,7 +269,7 @@
 .flex {
     display: flex;
     flex-wrap: wrap;
-    justify-content: space-between;
+    justify-content: space-around;
 }
 
 .post_user {
