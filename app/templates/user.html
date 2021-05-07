@@ -2,29 +2,31 @@
 
 {% block content %}
     <div class="content content_margin mb-4">
-        <h1 class="m-0 mb-5">{{ user.get_fullname() }}</h1>
+    <h1 class="m-0 mb-5">{{ user.get_fullname() }}</h1>
 
-        <div class="row padding">
-            <div class="column_img">
-                <div class="holder m-o p-0 ">
-                    <img  src="{{ url_for('avatar', filename=user.get_avatar_name()) }}"
-                         alt="User avatar" id="avatar">
-                    {% if current_user.is_can_edit(user) %}
-                        <div class="block">
-                        <a href="{{ url_for("edit_profile", user_id=user.id) }}"><i class="bi bi-pencil-square"></i></a>
-                    {% else %}
-                            <div>
-                                {% endif %}
-                    </div>
+    <div class="row border rounded bg-white" style="max-width: 720px">
+    <div style="max-width: 346px" class="border-right _column_img">
+        <div class="column_img p-5">
+            <div class="holder m-o p-0 ">
+                <img src="{{ url_for('avatar', filename=user.get_avatar_name()) }}"
+                     alt="User avatar" id="avatar">
+                {% if current_user.is_can_edit(user) %}
+                    <div class="block">
+                    <a href="{{ url_for("edit_profile", user_id=user.id) }}"><i class="bi bi-pencil-square"></i></a>
+                {% else %}
+                    <div>
+                {% endif %}
+                </div>
                 </div>
             </div>
-            <div class="column border rounded bg-white">
+    </div>
+            <div class="column bg-white m-5">
                 <h2 class="au_text"> Email:
                     <a href="mailto:{{ user.email }}">{{ user.email }}</a>
                 </h2>
                 <h2 class="au_text">Роль: {{ user.get_role() }}</h2>
             </div>
-        </div>
+
 
 
         <!--<table class="mt-5">
@@ -65,15 +67,16 @@
             <p>Нет записей.</p>
         </div>
     {% else %}
-         <div class="flex content_margin content">
-        {% for post in posts %}
-            <div class="">
-                {% include '_post.html' %}
-            </div>
-        {% endfor %}
-         </div>
+        <div class="flex content_margin content">
+            {% for post in posts %}
+                <div class="">
+                    {% include '_post.html' %}
+                </div>
+            {% endfor %}
+        </div>
         <div class="content_margin content">
-            <a class="btn btn-outline-info btn-block" href="{{ url_for("user_posts", user_id=user.id) }}">Показать больше</a>
+            <a class="btn btn-outline-info btn-block" href="{{ url_for("user_posts", user_id=user.id) }}">Показать
+                больше</a>
         </div>
     {% endif %}
 
