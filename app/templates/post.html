@@ -113,16 +113,16 @@
                                 {% if current_user.is_can_edit(post) %}
                                     {# Да #}
                                     <td class="prove-td">
-                                        <img class="disapproved-img" width="24" src="../static/img/svg_icons/x.svg"
+                                        <i class="disapproved-img bi bi-x"
                                              alt=""
                                                 {% if visitor.lecturer_proved != 0 %}
                                              style="display: none;"
-                                                {% endif %}>
-                                        <img class="approved-img" width="24" src="../static/img/svg_icons/check.svg"
-                                             alt=""
+                                                {% endif %}></i>
+                                        <i class="approved-img bi bi-check"
                                                 {% if visitor.lecturer_proved == 0 %}
                                              style="display: none;"
                                                 {% endif %}>
+                                        </i>
                                     </td>
                                     <td>
                                         {# Кнопка подтвердить #}
@@ -133,7 +133,7 @@
                                                 {% if visitor.lecturer_proved != 0 %}
                                                 style="display: none;"
                                                 {% endif %}>
-                                            <img width="24" src="../static/img/svg_icons/check.svg" alt="">
+                                            <i class="approved-img bi bi-check"></i>
                                         </button>
                                         {# Кнопка отозвать подтверждение #}
                                         <button type="button" class="prove-button btn btn-danger"
@@ -143,14 +143,14 @@
                                                 {% if visitor.lecturer_proved == 0 %}
                                                 style="display: none;"
                                                 {% endif %}>
-                                            <img width="24" src="../static/img/svg_icons/x.svg" alt="">
+                                            <i class="approved-img bi bi-x"></i>
                                         </button>
                                     </td>
                                     <td>
                                         {# Кнопка удаления записи #}
                                         <button type="button" class="delete-journal-button btn btn-danger"
                                                 data-url="{{ url_for('delete_journal', journal_id=visitor.id) }}">
-                                            <img width="24" src="../static/img/svg_icons/trash.svg" alt="">
+                                            <i class="bi bi-trash"></i>
                                         </button>
                                     </td>
                                 {% else %}
@@ -159,16 +159,15 @@
                                     {% if visitor.lecturer_proved == 0 %}
                                         {# Нет #}
                                         <td class="prove-td">
-                                            <img width="24" src="../static/img/svg_icons/x.svg" alt="">
+                                            <i class="bi bi-x"></i>
                                         </td>
                                     {% else %}
                                         {# Да #}
                                         <td class="prove-td">
-                                            <img width="24" src="../static/img/svg_icons/check.svg" alt="">
+                                            <i class="bi bi-check"></i>
                                         </td>
                                     {% endif %}
                                 {% endif %}
-
                             </tr>
                         {% endfor %}
                         </tbody>
@@ -219,13 +218,13 @@
                                                     data-id="{{ request.user.id }}"
                                                     data-url="{{ url_for('accept_request', post_id=post.id) }}"
                                                     data-action="delete">
-                                                <img width="24" src="../static/img/svg_icons/check.svg" alt="">
+                                                <i class="bi bi-check"></i>
                                             </button>
                                             <button type="button" class="request-button cancel-button btn btn-danger"
                                                     data-id="{{ request.user.id }}"
                                                     data-url="{{ url_for('cancel_request', post_id=post.id) }}"
                                                     data-action="delete">
-                                                <img width="24" src="../static/img/svg_icons/x.svg" alt="">
+                                                <i class="bi bi-x"></i>
                                             </button>
                                         </div>
                                     </td>

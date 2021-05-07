@@ -61,11 +61,11 @@
                                         <div class="btn-group" role="group" aria-label="Approve or reject avatar">
                                             <button type="button" class="approveBtn btn btn-success"
                                                     data-url="{{ url_for('approve_avatar', avatar_id=avatar.id) }}">
-                                                <img width="24" src="../static/img/svg_icons/check.svg" alt="">
+                                                <i class="bi bi-x"></i>
                                             </button>
                                             <button type="button" class="approveBtn btn btn-danger"
                                                     data-url="{{ url_for('reject_avatar', avatar_id=avatar.id) }}">
-                                                <img width="24" src="../static/img/svg_icons/x.svg" alt="">
+                                                <i class="bi bi-check"></i>
                                             </button>
                                         </div>
                                     </div>
