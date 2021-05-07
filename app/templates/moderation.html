@@ -26,11 +26,11 @@
                         <p>Нет непроверенных фотографий.</p>
                     {% else %}
                         {% include "_navigation.html" %}
-                        
+
                         <div class="card-deck">
-                        {% for avatar in avatars %}
-                            {% include "_avatar.html" %}
-                        {% endfor %}
+                            {% for avatar in avatars %}
+                                {% include "_avatar.html" %}
+                            {% endfor %}
                         </div>
 
                         {% include "_navigation.html" %}
@@ -49,9 +49,8 @@
     <script type="application/javascript"
             src="https://cdn.jsdelivr.net/npm/fluidbox@2.0.5/dist/js/jquery.fluidbox.min.js"
             integrity="sha256-AVBLVWwvNE9uzNP36wynCSm3JIIkjvjXsj/Ol30JzGM=" crossorigin="anonymous"></script>
+
     <script type="application/javascript"
             src="{{ url_for('static', filename='js/moderation/approve_avatar.js') }}"></script>
-    <script>
-        $('.avatar').fluidbox();
-    </script>
+    <script type="application/javascript" src="{{ url_for('static', filename='js/moderation/fluidbox.js') }}"></script>
 {% endblock %}
