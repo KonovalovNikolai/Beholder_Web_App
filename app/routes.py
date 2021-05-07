@@ -498,3 +498,9 @@ def moderation():
     return render_template('moderation.html', title='Модерация',
                            avatars=avatars.paginate(page=page, per_page=per_page, error_out=True).items,
                            pagination=pagination)
+
+
+@app.route('/search/<name>/')
+@app.route('/search/<name>')
+def search():
+    pass
