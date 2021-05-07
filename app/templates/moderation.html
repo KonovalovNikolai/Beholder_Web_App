@@ -26,50 +26,11 @@
                     {% if not avatars %}
                         <p>Нет непроверенных фотографий.</p>
                     {% else %}
-                        <div class="d-flex justify-content-between mb-3">
-                            <a class="btn btn-outline-primary {% if prev_url == '#' %} disabled {% endif %}"
-                               href="{{ prev_url }}"
-                               aria-label="Previous">
-                                <span aria-hidden="true">&laquo;</span>
-                                <span class="sr-only">Previous</span>
-                            </a>
-                            <a class="btn btn-outline-primary {% if next_url == '#' %} disabled {% endif %}"
-                               href="{{ next_url }}"
-                               aria-label="Next">
-                                <span aria-hidden="true">&raquo;</span>
-                                <span class="sr-only">Next</span>
-                            </a>
-                        </div>
+                        {% include "_navigation.html" %}
+
                         <div class="card-deck">
                             {% for avatar in avatars %}
-                                <div class="approve-box card" style="max-width: 250px">
-                                    <div class="card-body m-auto">
-                                        <div class="m-auto" style="max-width: 128px">
-                                            <a class="avatar" href="{{ url_for('avatar', filename=avatar.filename) }}"
-                                               rel="avatars">
-                                                <img src="{{ url_for('avatar', filename=avatar.filename) }}"
-                                                     alt="Аватар"
-                                                     width="128px"/>
-                                            </a>
-                                        </div>
-                                        <a class="card-title m-auto" href="{{ url_for('profile', user_id=avatar.user.id) }}"
-                                           target="_blank">
-                                            {{ avatar.user.get_fullname() }}
-                                        </a>
-                                    </div>
-                                    <div class="card-footer">
-                                        <div class="btn-group" role="group" aria-label="Approve or reject avatar">
-                                            <button type="button" class="approveBtn btn btn-success"
-                                                    data-url="{{ url_for('approve_avatar', avatar_id=avatar.id) }}">
-                                                <i class="bi bi-x"></i>
-                                            </button>
-                                            <button type="button" class="approveBtn btn btn-danger"
-                                                    data-url="{{ url_for('reject_avatar', avatar_id=avatar.id) }}">
-                                                <i class="bi bi-check"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
+                                {% include "_avatar.html" %}
                             {% endfor %}
                         </div>
                     {% endif %}

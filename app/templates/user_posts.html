@@ -2,15 +2,14 @@
 
 {% block content %}
     <div class="content mb-2 content_margin">
-        {% include "_navigation.html" %}
         {% if not posts %}
             <p>Нет записей.</p>
         {% else %}
+            {% include "_navigation.html" %}
+
             {% for post in posts %}
                 {% include '_post.html' %}
             {% endfor %}
-
-
         {% endif %}
     </div>
 {% endblock %}
