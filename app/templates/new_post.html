@@ -18,30 +18,31 @@
 {% endblock %}
 
 {% block content %}
-    <h1>Создание новой записи.</h1>
+    <div class="content content_margin">
+        <h1>Создание новой записи.</h1>
 
-    <div class="container">
-        <form upload_to="{{ url_for('upload_post_image') }}"
-              class="dropzone" action="{{ url_for('secure_post_image') }}">
-        </form>
-        <form method="POST" id="post-info">
-            {{ form.hidden_tag() }}
-            <p>
-                {{ form.room.label }}<br>
-                {{ form.room(size=20) }}
-            </p>
-            <p>
-                {{ form.lesson.label }}<br>
-                {{ form.lesson(size=20, id='lesson') }}
-            </p>
-            <p>
-                {{ form.notes.label }}<br>
-                {{ form.notes(cols=50, rows=4) }}
-            </p>
-        </form>
-        <button  id="create">Создать</button>
+        <div class="">
+            <form upload_to="{{ url_for('upload_post_image') }}"
+                  class="dropzone" action="{{ url_for('secure_post_image') }}">
+            </form>
+            <form method="POST" id="post-info" class="mt-4">
+                {{ form.hidden_tag() }}
+                <p>
+                    {{ form.room.label(class="ml-1") }} <br>
+                    {{ form.room(size=20, class="form-control", placeholder="Г-999") }}
+                </p>
+                <p>
+                    {{ form.lesson.label(class="ml-1") }}<br>
+                    {{ form.lesson(size=20, id='lesson', class="form-control", placeholder="Предмет") }}
+                </p>
+                <p>
+                    {{ form.notes.label(class="ml-1") }}<br>
+                    {{ form.notes(cols=50, rows=3, class="form-control", placeholder="Доп. информация") }}
+                </p>
+            </form>
+            <button class="btn btn-success btn-lg mt-3" id="create">Создать</button>
+        </div>
     </div>
-
 {% endblock %}
 
 {% block scripts %}
