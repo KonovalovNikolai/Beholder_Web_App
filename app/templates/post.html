@@ -6,27 +6,27 @@
 {% endblock %}
 
 {% block content %}
-    <div class="content content_margin mb-2">
+    <div class="content content_margin mb-1">
         {% include '_post_header.html' %}
-        <div>
-            <h2>Аудитория: {{ post.room }},</h2>
-            <h2>Занятие: {{ post.lesson }}.</h2>
-            <h2>Заметка: {{ post.notes }}</h2>
+        <div class="d-flex flex-fill mt-1">
+            {% if post.room %}
+                <p class="pr-3 mb-0">Аудитория: {{ post.room }}</p>
+            {% endif %}
+            {% if post.lesson %}
+                <p class="pr-3 mb-0">{{ post.lesson }}</p>
+            {% endif %}
         </div>
 
-        <!-- Основной блок слайдера -->
-        <div class="slider">
-
-            {% for image in post.get_images() %}
-                <div class="item">
-                    <img src="{{ url_for('static', filename=image.get_path(to_static=True)) }}" alt="">
+        {% if post.notes %}
+            <div class="card mt-1 mb-2">
+                <div class="card-body">
+                    <h4 class="card-title">Заметка</h4>
+                    <p class="card-text">
+                        {{ post.notes }}
+                    </p>
                 </div>
-            {% endfor %}
-
-            <!-- Кнопки-стрелочки -->
-            <a class="previous" onclick="previousSlide()">&#10094;</a>
-            <a class="next" onclick="nextSlide()">&#10095;</a>
-        </div>
+            </div>
+        {% endif %}
 
         {% if current_user.is_student() %}
             {% if post.check_student(current_user.get_student().id) %}
@@ -59,6 +59,21 @@
                 </div>
             {% endif %}
         {% endif %}
+
+        <!-- Основной блок слайдера -->
+        <div class="w-100 rounded bg-dark mt-1 mb-2 p-2">
+            <div class="slider bg-dark">
+                {% for image in post.get_images() %}
+                    <div class="item">
+                        <img class="img-fluid" src="{{ url_for('static', filename=image.get_path(to_static=True)) }}"
+                             alt="">
+                    </div>
+                {% endfor %}
+                <!-- Кнопки-стрелочки -->
+                <a class="previous" onclick="previousSlide()">&#10094;</a>
+                <a class="next" onclick="nextSlide()">&#10095;</a>
+            </div>
+        </div>
 
         <details open="">
             <summary>Отмеченные студенты</summary>
@@ -98,13 +113,15 @@
                                 {% if current_user.is_can_edit(post) %}
                                     {# Да #}
                                     <td class="prove-td">
-                                        <img class="disapproved-img" width="24" src="../static/img/svg_icons/x.svg" alt=""
+                                        <img class="disapproved-img" width="24" src="../static/img/svg_icons/x.svg"
+                                             alt=""
                                                 {% if visitor.lecturer_proved != 0 %}
-                                                    style="display: none;"
+                                             style="display: none;"
                                                 {% endif %}>
-                                        <img class="approved-img" width="24" src="../static/img/svg_icons/check.svg" alt=""
+                                        <img class="approved-img" width="24" src="../static/img/svg_icons/check.svg"
+                                             alt=""
                                                 {% if visitor.lecturer_proved == 0 %}
-                                                    style="display: none;"
+                                             style="display: none;"
                                                 {% endif %}>
                                     </td>
                                     <td>
@@ -133,7 +150,7 @@
                                         {# Кнопка удаления записи #}
                                         <button type="button" class="delete-journal-button btn btn-danger"
                                                 data-url="{{ url_for('delete_journal', journal_id=visitor.id) }}">
-                                            <img width="24" src="../static/img/svg_icons/x.svg" alt="">
+                                            <img width="24" src="../static/img/svg_icons/trash.svg" alt="">
                                         </button>
                                     </td>
                                 {% else %}
@@ -170,8 +187,10 @@
                         <h2 id="no-request-message" style="display: none;">Нет запросов.</h2>
                         <input type="text" class="table-search form-control pull-right" id="request-search"
                                placeholder="Поиск по таблице">
-                        <button id="accept-selected">Принять выделенные запросы</button>
-                        <button id="cancel-selected">Отклонить выделенные запросы</button>
+                        <div class="btn-group pl-0" role="group" aria-label="Basic example">
+                            <button id="accept-selected" type="button" class="btn btn-success">Принять выделенные запросы</button>
+                            <button id="cancel-selected" type="button" class="btn btn-danger">Отклонить выделенные запросы</button>
+                        </div>
                         <table id="request-table" class="searchable-table table table-striped">
                             <thead>
                             <tr align="center">
@@ -195,18 +214,20 @@
                                     <td class="fullname">{{ request.user.get_fullname() }}</td>
                                     <td>{{ request.get_humanized_time() }}</td>
                                     <td class="button-td">
-                                        <button type="button" class="request-button accept-button btn btn-success"
-                                                data-id="{{ request.user.id }}"
-                                                data-url="{{ url_for('accept_request', post_id=post.id) }}"
-                                                data-action="delete">
-                                            <img width="24" src="../static/img/svg_icons/check.svg" alt="">
-                                        </button>
-                                        <button type="button" class="request-button cancel-button btn btn-danger"
-                                                data-id="{{ request.user.id }}"
-                                                data-url="{{ url_for('cancel_request', post_id=post.id) }}"
-                                                data-action="delete">
-                                            <img width="24" src="../static/img/svg_icons/x.svg" alt="">
-                                        </button>
+                                        <div class="btn-group" role="group" aria-label="Basic example">
+                                            <button type="button" class="request-button accept-button btn btn-success"
+                                                    data-id="{{ request.user.id }}"
+                                                    data-url="{{ url_for('accept_request', post_id=post.id) }}"
+                                                    data-action="delete">
+                                                <img width="24" src="../static/img/svg_icons/check.svg" alt="">
+                                            </button>
+                                            <button type="button" class="request-button cancel-button btn btn-danger"
+                                                    data-id="{{ request.user.id }}"
+                                                    data-url="{{ url_for('cancel_request', post_id=post.id) }}"
+                                                    data-action="delete">
+                                                <img width="24" src="../static/img/svg_icons/x.svg" alt="">
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             {% endfor %}
