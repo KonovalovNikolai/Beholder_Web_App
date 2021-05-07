@@ -3,8 +3,12 @@
 }
 
 .border_content {
-    background-color: #F8F8F8;
+
+    border: 1px solid #dee2e6;
+    border-top: none !important;
+    background-color: #FFFFFF;
     outline-offset: 0px;
+
 }
 
 .login {
@@ -36,8 +40,9 @@
 
 .login_field {
     border-style: none;
-    border-bottom: 1px solid #C4C4C4;
+    border-bottom: 1px solid #b4b4b4;
     outline: none;
+    background-color: #FFFFFF;
 }
 
 .li_mes {
@@ -89,12 +94,13 @@
 
 }
 
-.block img {
+.block i {
     position: absolute;
-    bottom: 3%;
-    left: 3%;
+    bottom: 0%;
+    left: 4%;
     margin: 0;
-
+    font-size: 32px;
+    color: black;
 }
 
 .post_info {
@@ -103,7 +109,7 @@
 }
 
 .post_m {
-    padding-left: 35px;
+    /*padding-left: 35px;*/
     padding-right: 35px;
     padding-top: 15px;
     padding-bottom: 15px;
@@ -130,11 +136,11 @@
 }
 
 /* Clear floats after the columns */
-.row:after {
-    content: "";
-    display: table;
-    clear: both;
-}
+/*.row:after {*/
+/*    content: "";*/
+/*    display: table;*/
+/*    clear: both;*/
+/*}*/
 
 /* Responsive layout - makes the two columns stack on top of each other instead of next to each other */
 @media screen and (max-width: 1000px) {
@@ -184,7 +190,7 @@
 .but_pos {
     position: absolute;
     bottom: 0;
-    left: 0;
+    right: 0;
     margin: 0;
 
 }
@@ -233,4 +239,24 @@
 
 .margin {
     margin-top: 25px;
+}
+
+.but_edit {
+    width: 170px;
+}
+
+.padding_edit {
+    padding-top: 15px;
+
+}
+
+.flex {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.post_user {
+    padding-left: 35px;
+    padding-right: 35px;
 }

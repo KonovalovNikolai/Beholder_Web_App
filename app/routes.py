@@ -346,7 +346,7 @@ def index():
 @login_required
 def posts():
     page = request.args.get('page', 1, type=int)
-    posts = Post.query.filter(Post.is_done.isnot(0)).order_by(db.desc(Post.timestamp)).paginate(page, 1, True)
+    posts = Post.query.filter(Post.is_done.isnot(0)).order_by(db.desc(Post.timestamp)).paginate(page, 10, True)
 
     next_url = url_for("posts", page=posts.next_num) if posts.has_next else None
     prev_url = url_for("posts", page=posts.prev_num) if posts.has_prev else None

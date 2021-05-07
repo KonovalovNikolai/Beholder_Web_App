@@ -1,10 +1,10 @@
-<header id="post-header" style="height: 50px">
-    <div class="p-0 m-auto">
-    <span>
-        <a href="{{ url_for('profile', user_id=post.author.id) }}">
+<header id="post-header" >
+    <div class="">
+    <span class="no_dec">
+        <a class="click_link" href="{{ url_for('profile', user_id=post.author.id) }}">
             <img class="post_info" src="{{ url_for('avatar', filename=post.author.get_avatar_name()) }}" width="50">
         </a>
-        <a class="ml-3" href="{{ url_for('profile', user_id=post.author.id) }}">
+        <a class="ml-3 click_link" href="{{ url_for('profile', user_id=post.author.id) }}">
             {{ post.author.get_fullname() }}
             </a>
         <br>

@@ -11,8 +11,7 @@
                          alt="User avatar" id="avatar">
                     {% if current_user.is_can_edit(user) %}
                         <div class="block">
-                        <a href="{{ url_for("edit_profile", user_id=user.id) }}"><img width="32"
-                                                                                      src="../static/img/svg_icons/pencil-square.svg"></a>
+                        <a href="{{ url_for("edit_profile", user_id=user.id) }}"><i class="bi bi-pencil-square"></i></a>
                     {% else %}
                             <div>
                                 {% endif %}
@@ -53,7 +52,7 @@
             </tr>
         </table>-->
     </div>
-    <div class="content content_margin mb-2">
+    <div class="content content_margin">
         {% if not user.is_student() %}
             <h2 class="m-0">Созданные записи:</h2>
         {% else %}
@@ -62,17 +61,17 @@
     </div>
 
     {% if not posts %}
-        <div class="content  content_margin mb-2">
+        <div class="content_margin mb-2">
             <p>Нет записей.</p>
         </div>
     {% else %}
         {% for post in posts %}
-            <div class="content_margin">
+            <div class="content_margin post_user">
                 {% include '_post.html' %}
             </div>
         {% endfor %}
-        <div class="content_margin center mb-2 link_all_div no_dec border">
-            <a class="click_link btn btn-outline-info btn-block content_post" href="{{ url_for("user_posts", user_id=user.id) }}">Показать больше</a>
+        <div class="content_margin content">
+            <a class="btn btn-outline-info btn-block" href="{{ url_for("user_posts", user_id=user.id) }}">Показать больше</a>
         </div>
     {% endif %}
 

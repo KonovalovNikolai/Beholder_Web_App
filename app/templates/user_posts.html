@@ -1,14 +1,16 @@
 {% extends "base.html" %}
 
 {% block content %}
-    {% include "_navigation.html" %}
-    {% if not posts %}
-        <p>Нет записей.</p>
-    {% else %}
-        {% for post in posts %}
-            {% include '_post.html' %}
-        {% endfor %}
+    <div class="content mb-2 content_margin">
+        {% include "_navigation.html" %}
+        {% if not posts %}
+            <p>Нет записей.</p>
+        {% else %}
+            {% for post in posts %}
+                {% include '_post.html' %}
+            {% endfor %}
 
 
-    {% endif %}
+        {% endif %}
+    </div>
 {% endblock %}
