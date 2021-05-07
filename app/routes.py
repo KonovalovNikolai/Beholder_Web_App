@@ -1,14 +1,17 @@
 import imghdr
-import uuid
 import os
-from flask import abort, flash, jsonify, redirect, render_template, request, send_from_directory, url_for
+import uuid
+
+from flask import abort, flash, redirect, render_template, request, send_from_directory, url_for
 from flask_login import current_user, login_required, login_user, logout_user
 from flask_paginate import Pagination, get_page_parameter
 from werkzeug.utils import secure_filename
 
 from app import app, db, recognition
 from app.forms import ChangePasswordForm, CreatePostForm, EditProfileForm, LoginForm
-from app.models import Avatar, Image, Journal, Post, Request, Student, User
+from app.models import Avatar, Image, Journal, Post, Request, User
+
+
 # from app.tasks import recognize_task
 from app.tasks import import_to_excel
 
