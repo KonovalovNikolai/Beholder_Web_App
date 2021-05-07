@@ -124,13 +124,13 @@
 
 .column_edit {
     float: left;
-    width: 55%;
+    width: 60%;
     position: relative;
 }
 
 .column_img {
     float: left;
-    width: 45%;
+    width: 40%;
 
 
 }
@@ -168,7 +168,7 @@
     }
 
     .input_center {
-         text-align: center !important;
+        text-align: center !important;
     }
 
     .column_edit {
@@ -178,7 +178,20 @@
         margin-right: auto;
         margin-top: 25px;
     }
+
+    .flex {
+        justify-content: center !important;
+    }
+
+    .column_img_edit {
+        width: 100%;
+        text-align: center;
+        margin-left: auto;
+        margin-right: auto;
+    }
 }
+
+
 
 .center {
     text-align: center;
@@ -259,4 +272,20 @@
 .post_user {
     padding-left: 35px;
     padding-right: 35px;
+}
+
+.flex_edit {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.column_img_edit {
+    float: left;
+    width: 35%;
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+
+
 }
