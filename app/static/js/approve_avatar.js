@@ -17,5 +17,4 @@ $('.approveBtn').click(function () {
             console.log(response);
         }
     })
-
 });

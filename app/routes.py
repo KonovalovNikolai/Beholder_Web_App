@@ -473,7 +473,7 @@ def moderation():
         abort(403)
 
     avatar_page = request.args.get('page', 1, type=int)
-    avatars = db.session.query(Avatar).filter(Avatar.is_proved == 0).paginate(avatar_page, 1, True)
+    avatars = db.session.query(Avatar).filter(Avatar.is_proved == 0).paginate(avatar_page, 10, True)
     next_url = url_for("moderation", page=avatars.next_num) if avatars.has_next else '#'
     prev_url = url_for("moderation", page=avatars.prev_num) if avatars.has_prev else '#'
 
