@@ -1,6 +1,5 @@
 import imghdr
 import json
-import uuid
 import os
 import uuid
 
