@@ -28,7 +28,7 @@
 </head>
 <body class="body_base">
 {% block navbar %}
-    <nav class="navbar bg-dark navbar-dark navbar-expand-md" style="box-shadow: 0em 0.3em 10px rgba(122,122,122,0.5);">
+    <nav class="navbar bg-dark navbar-dark navbar-expand-md">
         <a class="navbar-brand mr-5" href="{{ url_for("index") }}">Beholder</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
                 aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -58,7 +58,7 @@
                             {{ current_user.get_fullname() }}
                         </a>
                     </li>
-                    <li class="nav-item">
+                    <li class="nav-item ml-4">
                         <a class="nav-link" href="{{ url_for("logout") }}">Выйти</a>
                     </li>
                 {% endif %}
@@ -84,20 +84,21 @@
     {% endif %}
 {% endwith %}
 
-<div class="container-fluid mt-5">
+<div class="container-fluid mt-3 min-vh-100">
     {% block content %}
     {% endblock %}
 </div>
 
-<script type="application/javascript" src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"
-        integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
-<script type="application/javascript" src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.min.js"
-        integrity="sha256-7dA7lq5P94hkBsWdff7qobYkp9ope/L5LQy2t/ljPLo=" crossorigin="anonymous"></script>
+<footer class="bg-light text-center text-lg-start">
+    <div class="text-center p-3" style="background-color: rgba(0, 0, 0, 0.2);">
+        © 2020 Copyright:
+        <a class="text-dark" href="https://mdbootstrap.com/">MDBootstrap.com</a>
+    </div>
 
 <script type="application/javascript" src="{{ url_for('static', filename='js/base/alert.js') }}"></script>
 
-{% block scripts %}
-{% endblock %}
-
+    {% block scripts %}
+    {% endblock %}
+</footer>
 </body>
 </html>

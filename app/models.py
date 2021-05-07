@@ -76,6 +76,10 @@ class User(UserMixin, db.Model):
             name = '{} {} {}'.format(self.lastname, self.firstname, self.patronymic)
         elif self.lastname and self.firstname:
             name = '{} {}'.format(self.lastname, self.firstname)
+        elif self.firstname and self.patronymic:
+            name = '{} {}'.format(self.firstname, self.patronymic)
+        elif self.firstname:
+            name = self.firstname
 
         if name == '':
             return self.email
@@ -83,7 +87,7 @@ class User(UserMixin, db.Model):
 
     def get_role(self):
         """
-        Получить название роли пользователя, взависимости от его типа.
+        Получить название роли пользователя, в зависимости от его типа.
         Соответствие типов:
             1 - Студент;
             2 - Преподаватель;
@@ -292,6 +296,8 @@ class Post(db.Model):
     notes = db.Column(db.Text())
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     is_done = db.Column(db.Integer)
+    changed = db.Column(db.Integer, default=1)
+    excel_file_name = db.Column(db.String(64))
 
     images = db.relationship('Image', backref='post', lazy='dynamic')
     journals = db.relationship('Journal', backref='post', lazy='dynamic')
@@ -309,6 +315,11 @@ class Post(db.Model):
     def get_humanized_time(self):
         time = arrow.get(self.timestamp)
         return time.humanize(locale='ru')
+
+    def get_excel_path(self):
+        if not self.excel_file_name:
+            return None
+        return "./app/" + app.config['EXCEL_FILES_PATH'] + self.excel_file_name
 
     def get_first_image(self):
         return self.images.first()

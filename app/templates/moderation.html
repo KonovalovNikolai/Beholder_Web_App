@@ -11,31 +11,27 @@
             <div class="col-md-2 mr-0">
                 <ul class="nav nav-pills flex-column">
                     <li class="nav-item bg-primary">
-                        <a class="nav-link active" href="#">Active</a>
+                        <a class="nav-link active" href="#">Фото</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#">Link</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Link</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Disabled</a>
                     </li>
                 </ul>
             </div>
             <div class="col-sm">
                 <div class="ml-4">
-                    <h1 class="m-0 mb-5">Title</h1>
+                    <h1 class="m-0 mb-5">Модерация фотографий студентов.</h1>
 
                     {% if not avatars %}
                         <p>Нет непроверенных фотографий.</p>
                     {% else %}
                         {% include "_navigation.html" %}
-
+                        
+                        <div class="card-deck">
                         {% for avatar in avatars %}
                             {% include "_avatar.html" %}
                         {% endfor %}
+                        </div>
 
                         {% include "_navigation.html" %}
                     {% endif %}

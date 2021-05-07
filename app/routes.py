@@ -2,17 +2,16 @@ import imghdr
 import os
 import uuid
 
-from flask import abort, flash, redirect, render_template, request, send_from_directory, url_for
+from flask import abort, flash, jsonify, redirect, render_template, request, send_from_directory, url_for
 from flask_login import current_user, login_required, login_user, logout_user
 from flask_paginate import Pagination, get_page_parameter
 from werkzeug.utils import secure_filename
 
 from app import app, db, recognition
 from app.forms import ChangePasswordForm, CreatePostForm, EditProfileForm, LoginForm
-from app.models import Avatar, Image, Journal, Post, Request, User
-
-
+from app.models import Avatar, Image, Journal, Post, Request, Student, User
 # from app.tasks import recognize_task
+from app.tasks import import_to_excel
 
 
 def validate_image(stream):
@@ -42,6 +41,25 @@ def too_large(e):
 @app.route('/avatar/<path:filename>')
 def avatar(filename):
     return send_from_directory(app.config["AVATARS_PATH"], filename, as_attachment=True)
+
+
+@app.route('/download/<path:filename>')
+def download_file(filename):
+    return send_from_directory(app.config["EXCEL_FILES_PATH"], filename)
+
+
+@app.route('/api/download_excel/<int:post_id>')
+def download_excel(post_id):
+    if current_user.is_anonymous:
+        abort(403)
+
+    post = Post.query.get(post_id)
+    if not post:
+        abort(403)
+
+    import_to_excel(post_id)
+
+    return jsonify(url=url_for('download_file', filename=post.excel_file_name))
 
 
 @app.route('/api/secure_image', methods=['POST'])
@@ -185,8 +203,25 @@ def reject_avatar(avatar_id):
     return 'Ok', 201
 
 
-@app.route('/api/approve_student/<int:journal_id>', methods=['POST'])
-def approve_student(journal_id):
+@app.route('/api/delete_journal/<int:journal_id>', methods=['DELETE'])
+def delete_journal(journal_id):
+    if current_user.is_anonymous or current_user.is_student():
+        abort(403)
+    journal = Journal.query.get(journal_id)
+
+    if not journal:
+        abort(400)
+    if not current_user.is_can_edit(journal.post):
+        abort(400)
+
+    journal.post.changed = 0
+    db.session.delete(journal)
+    db.session.commit()
+    return 'Ok', 202
+
+
+@app.route('/api/approve_journal/<int:journal_id>', methods=['POST'])
+def approve_journal(journal_id):
     if current_user.is_anonymous or current_user.is_student():
         abort(403)
 
@@ -194,16 +229,44 @@ def approve_student(journal_id):
         abort(400)
     student_id = request.form.get('id', type=int)
 
-    student = User.query.get(student_id)
+    student = Student.query.get(student_id)
     journal = Journal.query.get(journal_id)
 
-    if journal.student_id != student.id:
+    if not student:
         abort(400)
-
+    if not journal or journal.student_id != student.id:
+        abort(400)
     if not current_user.is_can_edit(journal.post):
         abort(400)
 
+    journal.post.changed = 0
     journal.lecturer_proved = 1
+    db.session.commit()
+
+    return 'Ok', 202
+
+
+@app.route('/api/disapprove_journal/<int:journal_id>', methods=['POST'])
+def disapprove_journal(journal_id):
+    if current_user.is_anonymous or current_user.is_student():
+        abort(403)
+
+    if 'id' not in request.form:
+        abort(400)
+    student_id = request.form.get('id', type=int)
+
+    student = Student.query.get(student_id)
+    journal = Journal.query.get(journal_id)
+
+    if not student:
+        abort(400)
+    if not journal or journal.student_id != student.id:
+        abort(400)
+    if not current_user.is_can_edit(journal.post):
+        abort(400)
+
+    journal.post.changed = 0
+    journal.lecturer_proved = 0
     db.session.commit()
 
     return 'Ok', 202
@@ -248,7 +311,7 @@ def accept_request(post_id):
     user = User.query.get(user_id)
 
     journal = Journal(student=user.get_student(), post=post, lecturer_proved=1)
-
+    post.changed = 0
     db.session.delete(request_)
     db.session.add(journal)
     db.session.commit()
@@ -360,8 +423,13 @@ def edit_profile(user_id):
 
     user.fill_form(profile_form)
 
+    for field in password_form:
+        if field.errors:
+            return render_template('edit_profile.html', title='Редактирование профиля', user=user,
+                                   profile_form=profile_form, password_form=password_form, active=True)
+
     return render_template('edit_profile.html', title='Редактирование профиля', user=user,
-                           profile_form=profile_form, password_form=password_form)
+                           profile_form=profile_form, password_form=password_form, active=False)
 
 
 @app.route('/user/<int:user_id>/posts')
