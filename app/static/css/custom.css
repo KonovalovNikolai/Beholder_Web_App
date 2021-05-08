@@ -202,7 +202,6 @@
 }
 
 
-
 .center {
     text-align: center;
     padding: 0;
@@ -298,4 +297,9 @@
     margin-right: auto;
 
 
+}
+
+.menu-verk {
+    border-right: 1px solid #FFFFFF !important;
+    margin-right: -1px !important;
 }
