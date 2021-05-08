@@ -8,7 +8,7 @@
             {{ post.author.get_fullname() }}
             </a>
         <br>
-        <span class="ml-3 card-subtitle text-muted ">{{ post.get_humanized_time() }}</span>
+        <span class="ml-3 card-subtitle text-muted ">{{ moment(post.timestamp).fromNow() }}</span>
     </span>
     </div>
 </header>

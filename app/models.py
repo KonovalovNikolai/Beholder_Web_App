@@ -1,5 +1,4 @@
 from datetime import datetime
-import arrow
 import numpy as np
 import json
 
@@ -312,10 +311,6 @@ class Post(db.Model):
             return images
         return self.images
 
-    def get_humanized_time(self):
-        time = arrow.get(self.timestamp)
-        return time.humanize(locale='ru')
-
     def get_excel_path(self):
         if not self.excel_file_name:
             return None
@@ -370,10 +365,6 @@ class Request(db.Model):
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     post_id = db.Column(db.Integer, db.ForeignKey('post.id'))
-
-    def get_humanized_time(self):
-        time = arrow.get(self.timestamp)
-        return time.humanize(locale='ru')
 
 
 class Image(db.Model):

@@ -211,7 +211,7 @@
                                         </a>
                                     </td>
                                     <td class="fullname">{{ request.user.get_fullname() }}</td>
-                                    <td>{{ request.get_humanized_time() }}</td>
+                                    <td>{{ moment(request.timestamp).fromNow() }}</td>
                                     <td class="button-td">
                                         <div class="btn-group" role="group" aria-label="Basic example">
                                             <button type="button" class="request-button accept-button btn btn-success"
