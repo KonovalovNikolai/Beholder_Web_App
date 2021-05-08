@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Уведомления</h1>
+    <div>
+        {% for message in messages %}
+            <div>
+                <div>
+                    <p>{{ message.header }}</p>
+                </div>
+                <div>
+                    <p>{{ message.body }}</p>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

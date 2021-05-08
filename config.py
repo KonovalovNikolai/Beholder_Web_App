@@ -20,3 +20,5 @@ class Config(object):
     MAX_CONTENT_LENGTH = 8 * 1024 * 1024
 
     EXCEL_FILES_PATH = 'non_static/excel_files/'
+
+    POSTS_PER_PAGE = 10

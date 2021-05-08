@@ -42,10 +42,14 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(120), index=True, unique=True)
     password_hash = db.Column(db.String(128))
 
+    last_message_read_time = db.Column(db.DateTime)
+
     student = db.relationship('Student', backref=db.backref('user', uselist=False))
     avatar = db.relationship('Avatar', backref=db.backref('user', uselist=False))
     posts = db.relationship('Post', backref='author', lazy='dynamic')
     requests = db.relationship('Request', backref='user', lazy='dynamic')
+
+    messages_received = db.relationship('Message', backref='user', lazy='dynamic')
 
     def set_password(self, password: str):
         """
@@ -170,6 +174,11 @@ class User(UserMixin, db.Model):
             return None
         return avatar.get_path()
 
+    def new_messages(self):
+        last_read_time = self.last_message_read_time or datetime(1900, 1, 1)
+        return Message.query.filter_by(user=self).filter(
+            Message.timestamp > last_read_time).count()
+
     def delete_avatar(self):
         avatar = self.get_avatar()
         if avatar:
@@ -272,6 +281,16 @@ class Avatar(db.Model):
         self.is_proved = 1
 
 
+class Message(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    header = db.Column(db.String(128))
+    body = db.Column(db.String(140))
+
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+
+
 class Post(db.Model):
     """
     Модель записи.
@@ -330,6 +349,7 @@ class Post(db.Model):
         if res:
             return True
         return False
+
 
 class Journal(db.Model):
     """

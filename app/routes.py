@@ -1,6 +1,7 @@
 import imghdr
 import uuid
 import os
+import datetime
 from flask import abort, flash, jsonify, redirect, render_template, request, send_from_directory, url_for
 from flask_login import current_user, login_required, login_user, logout_user
 from flask_paginate import Pagination, get_page_parameter
@@ -8,7 +9,7 @@ from werkzeug.utils import secure_filename
 
 from app import app, db, recognition
 from app.forms import ChangePasswordForm, CreatePostForm, EditProfileForm, LoginForm
-from app.models import Avatar, Image, Journal, Post, Request, Student, User
+from app.models import Avatar, Image, Journal, Post, Request, Student, User, Message
 # from app.tasks import recognize_task
 from app.tasks import import_to_excel
 
@@ -178,10 +179,20 @@ def approve_avatar(avatar_id):
     try:
         vector = recognition.create_new_vector(avatar.get_path(), student.id)
     except ValueError:
+        header = "Аватар отклонён."
+        body = "Ваш аватар был отклонён. Система не смогла распознать лицо, или было найденное несколько лиц."
+        msg = Message(user=student.user, header=header, body=body)
+        db.session.add(msg)
+        db.session.commit()
         abort(400)
+
+    header = "Аватар подтверждён."
+    body = "Ваш аватар был подтверждён."
+    msg = Message(user=student.user, header=header, body=body)
 
     student.set_vector(vector)
     avatar.prove()
+    db.session.add(msg)
     db.session.commit()
 
     return 'Ok', 201
@@ -196,6 +207,15 @@ def reject_avatar(avatar_id):
     if not avatar:
         abort(400)
 
+    student = avatar.user.get_student()
+    if not student:
+        abort(400)
+
+    header = "Аватар отклонён."
+    body = "Ваш аватар был отклонён. Система не смогла распознать лицо, или было найденное несколько лиц."
+    msg = Message(user=student.user, header=header, body=body)
+
+    db.session.add(msg)
     db.session.delete(avatar)
     db.session.commit()
 
@@ -212,6 +232,14 @@ def delete_journal(journal_id):
         abort(400)
     if not current_user.is_can_edit(journal.post):
         abort(400)
+
+    student = journal.student
+
+    header = "Отмена посещения."
+    body = "Вы были удаленны из таблицы посещения. <a href='{}'>Запись</a>".format(
+        url_for('post', post_id=journal.post.id))
+    msg = Message(user=student.user, header=header, body=body)
+    db.session.add(msg)
 
     journal.post.changed = 0
     db.session.delete(journal)
@@ -303,11 +331,16 @@ def accept_request(post_id):
     if not current_user.is_can_edit(post):
         abort(400)
 
-    request_ = Request.query.filter(Request.post_id == post_id, Request.user_id == user_id).first()
+    request_ = post.requests.filter(Request.user_id == user_id).first()
     if not request_:
         abort(400)
 
     user = User.query.get(user_id)
+
+    header = "Запрос принят."
+    body = "Ваш просьба отметить была принята. <a href='{}'>Запись</a>".format(url_for('post', post_id=post.id))
+    msg = Message(user=user, header=header, body=body)
+    db.session.add(msg)
 
     journal = Journal(student=user.get_student(), post=post, lecturer_proved=1)
     post.changed = 0
@@ -323,6 +356,10 @@ def cancel_request(post_id):
     if current_user.is_anonymous:
         abort(403)
 
+    post = Post.query.get(post_id)
+    if not current_user.is_can_edit(post):
+        abort(400)
+
     if 'id' not in request.form:
         abort(400)
 
@@ -331,7 +368,16 @@ def cancel_request(post_id):
         if current_user.id != user_id:
             abort(400)
 
-    Request.query.filter(Request.post_id == post_id, Request.user_id == user_id).delete()
+    user = User.query.get(user_id)
+    if not user:
+        abort(400)
+
+    header = "Запрос отклонён."
+    body = "Ваш просьба отметить была отклонена. <a href='{}'>Запись</a>".format(url_for('post', post_id=post.id))
+    msg = Message(user=user, header=header, body=body)
+    db.session.add(msg)
+
+    post.requests.filter(Request.post_id == post_id, Request.user_id == user_id).delete()
     db.session.commit()
 
     return 'Ok', 202
@@ -340,6 +386,17 @@ def cancel_request(post_id):
 @app.route('/')
 def index():
     return render_template('index.html', title='Home')
+
+
+@app.route('/messages')
+@login_required
+def messages():
+    current_user.last_message_read_time = datetime.datetime.utcnow()
+    db.session.commit()
+
+    messages_ = current_user.messages_received.all()
+
+    return render_template('messages.html', title='Уведомления', messages=messages_)
 
 
 @app.route('/posts')
