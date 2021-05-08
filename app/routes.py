@@ -259,7 +259,7 @@ def delete_journal(journal_id):
     body = {
         'message': "Вы были удаленны из таблицы посещения.",
         'link': {
-            'text': 'Запись',
+            'text': 'Открыть запись.',
             'url': url_for('post', post_id=journal.post.id)
         }
     }
@@ -340,7 +340,7 @@ def take_request(post_id):
     body = {
         'message': "Новая просьба отметить.",
         'link': {
-            'text': 'Запись',
+            'text': 'Открыть запись.',
             'url': url_for('post', post_id=post.id)
         }
     }
@@ -377,7 +377,7 @@ def accept_request(post_id):
     body = {
         'message': "Ваш просьба отметить была принята.",
         'link': {
-            'text': 'Запись',
+            'text': 'Открыть запись.',
             'url': url_for('post', post_id=post.id)
         }
     }
@@ -418,7 +418,7 @@ def cancel_request(post_id):
     body = {
         'message': "Ваш просьба отметить была отклонена.",
         'link': {
-            'text': 'Запись',
+            'text': 'Открыть запись.',
             'url': url_for('post', post_id=post.id)
         }
     }
@@ -442,7 +442,9 @@ def messages():
     messages_ = current_user.messages_received.order_by(Message.timestamp.desc()).all()
 
     current_user.last_message_read_time = datetime.datetime.utcnow()
-    current_user.reads_messages()
+    for msg in messages_:
+        msg._is_read = msg.is_read
+        msg.is_read = 1
     db.session.commit()
 
     return render_template('messages.html', title='Уведомления', messages=messages_)

@@ -13,8 +13,8 @@
                         <div class="toast-header">
                             <strong class="mr-auto">
                                 {{ message.header }}
-                                {% if message.is_read == 0 %}
-                                    <span class="badge badge-secondary">New</span>
+                                {% if message._is_read == 0 %}
+                                    <span class="badge badge-success">New</span>
                                 {% endif %}
                             </strong>
                             <small>{{ moment(message.timestamp).fromNow() }}</small>
@@ -24,10 +24,12 @@
                         </div>
                         <div class="toast-body">
                             {% with body = message.get_data() %}
-                                {{ body.message }}
-                                {% if 'link' in body %}
-                                    <a href="{{ body.link.url }}">{{ body.link.text }}</a>
-                                {% endif %}
+                                <div class="d-flex flex-column">
+                                    {{ body.message }}
+                                    {% if 'link' in body %}
+                                        <a href="{{ body.link.url }}">{{ body.link.text }}</a>
+                                    {% endif %}
+                                </div>
                             {% endwith %}
                         </div>
                     </div>

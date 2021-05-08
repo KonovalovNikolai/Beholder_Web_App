@@ -301,6 +301,8 @@ class Message(db.Model):
 
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
+    _is_read = 0
+
     def get_data(self):
         return json.loads(str(self.body))
 
