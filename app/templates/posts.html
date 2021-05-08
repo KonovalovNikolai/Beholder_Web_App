@@ -2,18 +2,18 @@
 
 {% block content %}
     <div class="content mb-2 content_margin">
-    {% include "_navigation.html" %}
+        {% include "_navigation.html" %}
         <div class="flex">
-        {% if not posts %}
+            {% if not posts %}
                 <h1>Здесь будут все записи</h1>
-        {% else %}
-            {% for post in posts %}
-                {% include '_post.html' %}
-            {% endfor %}
-        {% endif %}
+            {% else %}
+                {% for post in posts %}
+                    {% include '_post.html' %}
+                {% endfor %}
+            {% endif %}
         </div>
-    {% if not current_user.is_student() %}
-        <a class="btn btn-primary mt-2" href="{{ url_for("new_post") }}">Создать новую запись</a>
-    {% endif %}
+        {% if not current_user.is_student() %}
+            <a class="btn btn-primary mt-2" href="{{ url_for("new_post") }}">Создать новую запись</a>
+        {% endif %}
     </div>
 {% endblock %}

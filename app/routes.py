@@ -3,12 +3,12 @@ import uuid
 import os
 from flask import abort, flash, jsonify, redirect, render_template, request, send_from_directory, url_for
 from flask_login import current_user, login_required, login_user, logout_user
+from flask_paginate import Pagination, get_page_parameter
 from werkzeug.utils import secure_filename
 
 from app import app, db, recognition
-from app.forms import ChangePasswordForm, EditProfileForm, LoginForm, CreatePostForm
-from app.models import Avatar, User, Post, Image, Request, Journal, Student
-
+from app.forms import ChangePasswordForm, CreatePostForm, EditProfileForm, LoginForm
+from app.models import Avatar, Image, Journal, Post, Request, Student, User
 # from app.tasks import recognize_task
 from app.tasks import import_to_excel
 
@@ -345,13 +345,22 @@ def index():
 @app.route('/posts')
 @login_required
 def posts():
-    page = request.args.get('page', 1, type=int)
-    posts = Post.query.filter(Post.is_done.isnot(0)).order_by(db.desc(Post.timestamp)).paginate(page, 1, True)
+    search = False
 
-    next_url = url_for("posts", page=posts.next_num) if posts.has_next else None
-    prev_url = url_for("posts", page=posts.prev_num) if posts.has_prev else None
+    q = request.args.get('q')
+    if q:
+        search = True
 
-    return render_template('posts.html', title='Записи', posts=posts.items, next_url=next_url, prev_url=prev_url)
+    page = request.args.get(get_page_parameter(), type=int, default=1)
+    per_page = 3
+
+    posts = Post.query.filter(Post.is_done.isnot(0)).order_by(db.desc(Post.timestamp))
+
+    pagination = Pagination(page=page, per_page=per_page, total=posts.count(), search=search, bs_version=4)
+
+    return render_template('posts.html', title='Записи',
+                           posts=posts.paginate(page=page, per_page=per_page, error_out=True).items,
+                           pagination=pagination)
 
 
 @app.route('/post/<int:post_id>')
@@ -472,11 +481,19 @@ def moderation():
     if not current_user.is_moderator():
         abort(403)
 
-    avatar_page = request.args.get('page', 1, type=int)
-    avatars = db.session.query(Avatar).filter(Avatar.is_proved == 0).paginate(avatar_page, 10, True)
-    next_url = url_for("moderation", page=avatars.next_num) if avatars.has_next else '#'
-    prev_url = url_for("moderation", page=avatars.prev_num) if avatars.has_prev else '#'
+    search = False
 
-    return render_template('moderation.html', title='Модерация - проверка изображений', avatars=avatars.items,
-                           next_url=next_url,
-                           prev_url=prev_url)
+    q = request.args.get('q')
+    if q:
+        search = True
+
+    page = request.args.get(get_page_parameter(), type=int, default=1)
+    per_page = 10
+
+    avatars = db.session.query(Avatar).filter(Avatar.is_proved == 0)
+
+    pagination = Pagination(page=page, per_page=per_page, total=avatars.count(), search=search, bs_version=4)
+
+    return render_template('moderation.html', title='Модерация',
+                           avatars=avatars.paginate(page=page, per_page=per_page, error_out=True).items,
+                           pagination=pagination)
