@@ -211,7 +211,7 @@ def approve_avatar(avatar_id):
     body = {
         'message': "Ваш аватар был подтверждён."
     }
-    msg = Message(user=student.user, header=header, body=body)
+    msg = Message(user=student.user, header=header, body=json.dumps(body))
     db.session.add(msg)
 
     student.set_vector(vector)
@@ -230,15 +230,11 @@ def reject_avatar(avatar_id):
     if not avatar:
         abort(400)
 
-    user = avatar.user
-
     header = "Аватар отклонён."
     body = {
         'message': "Ваш аватар был отклонён. Система не смогла распознать лицо, или было найденное несколько лиц."
     }
-    msg = Message(user=user, header=header, body=json.dumps(body))
-    db.session.add(msg)
-
+    msg = Message(user=avatar.user, header=header, body=json.dumps(body))
     db.session.add(msg)
     db.session.delete(avatar)
     db.session.commit()

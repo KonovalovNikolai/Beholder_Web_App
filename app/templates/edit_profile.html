@@ -78,7 +78,7 @@
                         <form action="" method="POST">
                             <div class="flex">
                                 {{ profile_form.hidden_tag() }}
-                                {% for field in profile_form if field.name != "csrf_token" %}
+                                {% for field in profile_form if field.name != "csrf_token" and field.name != "group" %}
                                     <div class="mr-4">
                                         <p class="m-0 ">{{ field.label(class = "m-0") }}</p>
                                         <p class="mb-2">
@@ -89,6 +89,17 @@
                                         </p>
                                     </div>
                                 {% endfor %}
+                                {% if user.is_student() %}
+                                    <div class="mr-4">
+                                        <p class="m-0 ">{{ profile_form.group.label(class = "m-0") }}</p>
+                                        <p class="mb-2">
+                                            {{ profile_form.group(class = "input_center login_field", placeholder=profile_form.group.label.text) }}
+                                            {% for error in profile_form.group.errors %}
+                                                <span style="color: red;">{{ error }}</span>
+                                            {% endfor %}
+                                        </p>
+                                    </div>
+                                {% endif %}
                             </div>
                             <p class="mt-3"><input class="btn btn-dark but_edit" type="submit"
                                                    name="{{ profile_form.form_name }}"

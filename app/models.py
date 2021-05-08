@@ -38,6 +38,7 @@ class User(UserMixin, db.Model):
     firstname = db.Column(db.String(64))
     lastname = db.Column(db.String(64))
     patronymic = db.Column(db.String(64))
+    last_seen = db.Column(db.DateTime, index=True, default=datetime.utcnow)
 
     email = db.Column(db.String(120), index=True, unique=True)
     password_hash = db.Column(db.String(128))
@@ -221,12 +222,16 @@ class User(UserMixin, db.Model):
         form.firstname.data = self.firstname
         form.lastname.data = self.lastname
         form.patronymic.data = self.patronymic
+        if self.is_student():
+            form.group.data = self.get_student().group
 
     def update_from_form(self, form: EditProfileForm):
         self.email = form.email.data
         self.firstname = form.firstname.data
         self.lastname = form.lastname.data
         self.patronymic = form.patronymic.data
+        if self.is_student():
+            self.get_student().group = form.group.data
 
     def is_can_edit(self, obj) -> bool:
         if isinstance(obj, User):
@@ -419,6 +424,8 @@ class Image(db.Model):
 
 class Student(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+
+    group = db.Column(db.String(20))
 
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     vector = db.Column(db.Text())
