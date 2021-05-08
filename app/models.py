@@ -179,6 +179,13 @@ class User(UserMixin, db.Model):
         return Message.query.filter_by(user=self).filter(
             Message.timestamp > last_read_time).count()
 
+    def reads_messages(self):
+        messages = self.messages_received.filter(Message.is_read == 0).all()
+        for message in messages:
+            message.is_read = 1
+
+        db.session.commit()
+
     def delete_avatar(self):
         avatar = self.get_avatar()
         if avatar:
@@ -285,6 +292,7 @@ class Message(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     header = db.Column(db.String(128))
     body = db.Column(db.String(140))
+    is_read = db.Column(db.Integer, default=0)
 
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
 

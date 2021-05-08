@@ -391,10 +391,10 @@ def index():
 @app.route('/messages')
 @login_required
 def messages():
+    messages_ = current_user.messages_received.order_by(Message.timestamp.desc()).all()
+
     current_user.last_message_read_time = datetime.datetime.utcnow()
     db.session.commit()
-
-    messages_ = current_user.messages_received.all()
 
     return render_template('messages.html', title='Уведомления', messages=messages_)
 
