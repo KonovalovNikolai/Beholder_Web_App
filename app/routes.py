@@ -63,6 +63,24 @@ def download_excel(post_id):
     return jsonify(url=url_for('download_file', filename=post.excel_file_name))
 
 
+@app.route('/api/delete_message/<int:message_id>', methods=['DELETE'])
+def delete_message(message_id):
+    if current_user.is_anonymous:
+        abort(403)
+
+    msg = Message.query.get(message_id)
+    if not msg:
+        abort(400)
+
+    if msg.user.id != current_user.id:
+        abort(403)
+
+    db.session.delete(msg)
+    db.session.commit()
+
+    return '', 204
+
+
 @app.route('/api/secure_image', methods=['POST'])
 def secure_post_image():
     if current_user.is_anonymous and current_user.is_student():

@@ -2,31 +2,38 @@
 
 {% block content %}
     <h1>Уведомления</h1>
-    <div>
-        {% for message in messages %}
-            <div class="toast fade show" role="alert" aria-live="assertive" aria-atomic="true">
-                <div class="toast-header">
-                    <strong class="mr-auto">
-                        {{ message.header }}
-                        {% if message.is_read == 0 %}
-                            <span class="badge badge-secondary">New</span>
-                        {% endif %}
-                    </strong>
-                    <small>{{ moment(message.timestamp).fromNow() }}</small>
-                    <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+    {% if not messages %}
+        Уведомлений нет.
+    {% else %}
+        <div>
+            {% for message in messages %}
+                <div class="toast fade show" role="alert" aria-live="assertive" aria-atomic="true" data-url="{{ url_for('delete_message', message_id=message.id) }}">
+                    <div class="toast-header">
+                        <strong class="mr-auto">
+                            {{ message.header }}
+                            {% if message.is_read == 0 %}
+                                <span class="badge badge-secondary">New</span>
+                            {% endif %}
+                        </strong>
+                        <small>{{ moment(message.timestamp).fromNow() }}</small>
+                        <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="toast-body">
+                        {% with body = message.get_data() %}
+                            {{ body.message }}
+                            {% if 'link' in body %}
+                                <a href="{{ body.link.url }}">{{ body.link.text }}</a>
+                            {% endif %}
+                        {% endwith %}
+                    </div>
                 </div>
-                <div class="toast-body">
-                    {% with body = message.get_data()  %}
-                        {{ body.message }}
-                        {% if 'link' in body %}
-                            <a href="{{ body.link.url }}">{{ body.link.text }}</a>
-                        {% endif %}
-                    {% endwith %}
-                </div>
-            </div>
-        {% endfor %}
-    </div>
-    <script>$('.toast').toast();</script>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block scripts %}
+    <script type="text/javascript" src="{{ url_for('static', filename='js/messages.js') }}"></script>
 {% endblock %}
