@@ -56,17 +56,25 @@
                         <a class="nav-link" href="{{ url_for("login") }}">Войти</a>
                     </li>
                 {% else %}
-                    <li class="nav-item mr-3 position-relative my-auto">
+                    <li class="nav-item mr-3 my-auto" style="display: inline;">
                         {% set new_messages = current_user.new_messages() %}
-                        <a class="nav-link m-auto p-0" href="{{ url_for('messages') }}">
-                            <i class="bi bi-bell-fill" style="font-size: 20px;"></i>
+                        <div style="float: left;">
+                            <a class="nav-link m-auto p-0" href="{{ url_for('messages') }}">
+                                <i class="bi bi-bell-fill" style="font-size: 20px;"></i>
+
                             {% if new_messages %}
-                                <div class="bg-danger rounded-circle position-absolute" style="width: 5px; height: 5px; right: 0;
-                            top: 0;">
-                                    {{ new_messages }}
+                                <span class="badge-danger badge-pill"
+                                     style="float: right; text-align: center">
+                                    <p class="text-white m-0" style="font-size: 14px;">
+                                        {{ new_messages }}
+                                    </p>
+                                </span>
+                                </a>
                                 </div>
                             {% endif %}
-                        </a>
+
+
+
                     </li>
 
                     <li class="nav-item mr-4">
