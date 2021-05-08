@@ -18,11 +18,15 @@
                     </button>
                 </div>
                 <div class="toast-body">
-                    {{ message.body }}
+                    {% with body = message.get_data()  %}
+                        {{ body.message }}
+                        {% if 'link' in body %}
+                            <a href="{{ body.link.url }}">{{ body.link.text }}</a>
+                        {% endif %}
+                    {% endwith %}
                 </div>
             </div>
         {% endfor %}
     </div>
-    <div hidden>{{ current_user.reads_messages() }}</div>
     <script>$('.toast').toast();</script>
 {% endblock %}

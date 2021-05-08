@@ -184,8 +184,6 @@ class User(UserMixin, db.Model):
         for message in messages:
             message.is_read = 1
 
-        db.session.commit()
-
     def delete_avatar(self):
         avatar = self.get_avatar()
         if avatar:
@@ -291,12 +289,15 @@ class Avatar(db.Model):
 class Message(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     header = db.Column(db.String(128))
-    body = db.Column(db.String(140))
+    body = db.Column(db.Text)
     is_read = db.Column(db.Integer, default=0)
 
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
 
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+
+    def get_data(self):
+        return json.loads(str(self.body))
 
 
 class Post(db.Model):

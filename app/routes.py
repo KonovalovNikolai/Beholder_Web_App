@@ -1,4 +1,5 @@
 import imghdr
+import json
 import uuid
 import os
 import datetime
@@ -180,19 +181,23 @@ def approve_avatar(avatar_id):
         vector = recognition.create_new_vector(avatar.get_path(), student.id)
     except ValueError:
         header = "Аватар отклонён."
-        body = "Ваш аватар был отклонён. Система не смогла распознать лицо, или было найденное несколько лиц."
-        msg = Message(user=student.user, header=header, body=body)
+        body = {
+            'message': "Ваш аватар был отклонён. Система не смогла распознать лицо, или было найденное несколько лиц."
+        }
+        msg = Message(user=student.user, header=header, body=json.dumps(body))
         db.session.add(msg)
         db.session.commit()
         abort(400)
 
     header = "Аватар подтверждён."
-    body = "Ваш аватар был подтверждён."
+    body = {
+        'message': "Ваш аватар был подтверждён."
+    }
     msg = Message(user=student.user, header=header, body=body)
+    db.session.add(msg)
 
     student.set_vector(vector)
     avatar.prove()
-    db.session.add(msg)
     db.session.commit()
 
     return 'Ok', 201
@@ -207,13 +212,14 @@ def reject_avatar(avatar_id):
     if not avatar:
         abort(400)
 
-    student = avatar.user.get_student()
-    if not student:
-        abort(400)
+    user = avatar.user
 
     header = "Аватар отклонён."
-    body = "Ваш аватар был отклонён. Система не смогла распознать лицо, или было найденное несколько лиц."
-    msg = Message(user=student.user, header=header, body=body)
+    body = {
+        'message': "Ваш аватар был отклонён. Система не смогла распознать лицо, или было найденное несколько лиц."
+    }
+    msg = Message(user=user, header=header, body=json.dumps(body))
+    db.session.add(msg)
 
     db.session.add(msg)
     db.session.delete(avatar)
@@ -236,9 +242,14 @@ def delete_journal(journal_id):
     student = journal.student
 
     header = "Отмена посещения."
-    body = "Вы были удаленны из таблицы посещения. <a href='{}'>Запись</a>".format(
-        url_for('post', post_id=journal.post.id))
-    msg = Message(user=student.user, header=header, body=body)
+    body = {
+        'message': "Вы были удаленны из таблицы посещения.",
+        'link': {
+            'text': 'Запись',
+            'url': url_for('post', post_id=journal.post.id)
+        }
+    }
+    msg = Message(user=student.user, header=header, body=json.dumps(body))
     db.session.add(msg)
 
     journal.post.changed = 0
@@ -311,6 +322,17 @@ def take_request(post_id):
     if post.check_student(current_user.get_student().id):
         abort(406)
 
+    header = "Новый запрос."
+    body = {
+        'message': "Новая просьба отметить.",
+        'link': {
+            'text': 'Запись',
+            'url': url_for('post', post_id=post.id)
+        }
+    }
+    msg = Message(user=post.author, header=header, body=json.dumps(body))
+    db.session.add(msg)
+
     request_ = Request(user=current_user, post=post)
     db.session.add(request_)
     db.session.commit()
@@ -338,8 +360,14 @@ def accept_request(post_id):
     user = User.query.get(user_id)
 
     header = "Запрос принят."
-    body = "Ваш просьба отметить была принята. <a href='{}'>Запись</a>".format(url_for('post', post_id=post.id))
-    msg = Message(user=user, header=header, body=body)
+    body = {
+        'message': "Ваш просьба отметить была принята.",
+        'link': {
+            'text': 'Запись',
+            'url': url_for('post', post_id=post.id)
+        }
+    }
+    msg = Message(user=user, header=header, body=json.dumps(body))
     db.session.add(msg)
 
     journal = Journal(student=user.get_student(), post=post, lecturer_proved=1)
@@ -373,8 +401,14 @@ def cancel_request(post_id):
         abort(400)
 
     header = "Запрос отклонён."
-    body = "Ваш просьба отметить была отклонена. <a href='{}'>Запись</a>".format(url_for('post', post_id=post.id))
-    msg = Message(user=user, header=header, body=body)
+    body = {
+        'message': "Ваш просьба отметить была отклонена.",
+        'link': {
+            'text': 'Запись',
+            'url': url_for('post', post_id=post.id)
+        }
+    }
+    msg = Message(user=user, header=header, body=json.dumps(body))
     db.session.add(msg)
 
     post.requests.filter(Request.post_id == post_id, Request.user_id == user_id).delete()
@@ -394,6 +428,7 @@ def messages():
     messages_ = current_user.messages_received.order_by(Message.timestamp.desc()).all()
 
     current_user.last_message_read_time = datetime.datetime.utcnow()
+    current_user.reads_messages()
     db.session.commit()
 
     return render_template('messages.html', title='Уведомления', messages=messages_)
