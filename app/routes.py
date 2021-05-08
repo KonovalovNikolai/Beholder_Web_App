@@ -353,7 +353,7 @@ def posts():
         search = True
 
     page = request.args.get(get_page_parameter(), type=int, default=1)
-    per_page = 1
+    per_page = 3
 
     posts = Post.query.filter(Post.is_done.isnot(0)).order_by(db.desc(Post.timestamp))
 
