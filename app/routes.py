@@ -546,13 +546,16 @@ def edit_profile(user_id):
 def user_posts(user_id):
     user = User.query.get_or_404(user_id)
 
-    page = request.args.get('page', 1, type=int)
-    posts = user.get_posts(get_all=False).paginate(page, 1, True)
-    next_url = url_for("user_posts", user_id=user.id, page=posts.next_num) if posts.has_next else None
-    prev_url = url_for("user_posts", user_id=user.id, page=posts.prev_num) if posts.has_prev else None
+    page = request.args.get(get_page_parameter(), type=int, default=1)
+    per_page = 10
 
-    return render_template('user_posts.html', title='Записи пользователя', user=user, posts=posts.items,
-                           next_url=next_url, prev_url=prev_url)
+    posts = user.get_posts(get_all=False)
+
+    pagination = Pagination(page=page, per_page=per_page, total=posts.count(), bs_version=4)
+
+    return render_template('user_posts.html', title='Записи пользователя', user=user,
+                           posts=posts.paginate(page=page, per_page=per_page, error_out=True).items,
+                           pagination=pagination)
 
 
 @app.route('/login', methods=['GET', 'POST'])
