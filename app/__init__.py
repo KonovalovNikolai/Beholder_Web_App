@@ -1,7 +1,7 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
-from flask_migrate import Migrate
+# from flask_migrate import Migrate
 from flask_bootstrap import Bootstrap
 from flask_moment import Moment
 from celery import Celery
@@ -38,7 +38,8 @@ login.login_message = 'Пожалуйста, авторизуйтесь, что�
 login.login_message_category = 'secondary'
 
 db = SQLAlchemy(app)
-migrate = Migrate(app, db)
+db.create_all()
+# migrate = Migrate(app, db)
 
 moment = Moment(app)
 
