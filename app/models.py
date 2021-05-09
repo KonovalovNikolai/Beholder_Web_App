@@ -1,7 +1,7 @@
-from datetime import datetime
-import numpy as np
 import json
+from datetime import datetime
 
+import numpy as np
 from flask_login import UserMixin
 from werkzeug.security import check_password_hash, generate_password_hash
 

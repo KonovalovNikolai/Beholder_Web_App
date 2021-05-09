@@ -1,9 +1,9 @@
+import datetime
 import imghdr
 import json
 import os
 import uuid
 
-import datetime
 from flask import abort, flash, jsonify, redirect, render_template, request, send_from_directory, url_for
 from flask_login import current_user, login_required, login_user, logout_user
 from flask_paginate import Pagination, get_page_parameter
@@ -11,9 +11,7 @@ from werkzeug.utils import secure_filename
 
 from app import app, db, recognition
 from app.forms import ChangePasswordForm, CreatePostForm, EditProfileForm, LoginForm
-
-from app.models import Avatar, Image, Journal, Post, Request, Student, User, Message
-# from app.tasks import recognize_task
+from app.models import Avatar, Image, Journal, Message, Post, Request, Student, User
 from app.tasks import import_to_excel
 
 
@@ -24,6 +22,35 @@ def validate_image(stream):
     if not format:
         return None
     return '.' + (format if format != 'jpeg' else 'jpg')
+
+
+def verify_journal(journal_id, approve=False):
+    if current_user.is_anonymous or current_user.is_student():
+        abort(403)
+
+    if 'id' not in request.form:
+        abort(400)
+    student_id = request.form.get('id', type=int)
+
+    student = Student.query.get(student_id)
+    journal = Journal.query.get(journal_id)
+
+    if not student:
+        abort(400)
+    if not journal or journal.student_id != student.id:
+        abort(400)
+    if not current_user.is_can_edit(journal.post):
+        abort(400)
+
+    journal.post.changed = 0
+    if approve:
+        journal.lecturer_proved = 1
+    else:
+        journal.lecturer_proved = 0
+
+    db.session.commit()
+
+    return 'Ok', 202
 
 
 @app.errorhandler(400)
@@ -41,16 +68,19 @@ def too_large(e):
     return "Файл слишком большой", 413
 
 
+@app.route('/avatar/<path:filename>/')
 @app.route('/avatar/<path:filename>')
 def avatar(filename):
     return send_from_directory(app.config["AVATARS_PATH"], filename, as_attachment=True)
 
 
+@app.route('/download/<path:filename>/')
 @app.route('/download/<path:filename>')
 def download_file(filename):
     return send_from_directory(app.config["EXCEL_FILES_PATH"], filename)
 
 
+@app.route('/api/download_excel/<int:post_id>/')
 @app.route('/api/download_excel/<int:post_id>')
 def download_excel(post_id):
     if current_user.is_anonymous:
@@ -65,6 +95,7 @@ def download_excel(post_id):
     return jsonify(url=url_for('download_file', filename=post.excel_file_name))
 
 
+@app.route('/api/delete_message/<int:message_id>/', methods=['DELETE'])
 @app.route('/api/delete_message/<int:message_id>', methods=['DELETE'])
 def delete_message(message_id):
     if current_user.is_anonymous:
@@ -84,6 +115,7 @@ def delete_message(message_id):
 
 
 @app.route('/api/secure_image', methods=['POST'])
+@app.route('/api/secure_image/', methods=['POST'])
 def secure_post_image():
     if current_user.is_anonymous and current_user.is_student():
         abort(403)
@@ -99,6 +131,7 @@ def secure_post_image():
     return '', 204
 
 
+@app.route('/api/upload_image/', methods=['POST'])
 @app.route('/api/upload_image', methods=['POST'])
 def upload_post_image():
     if current_user.is_anonymous and current_user.is_student():
@@ -134,6 +167,7 @@ def upload_post_image():
     return "Ok", 201
 
 
+# @app.route('/api/task/<task_id>/', methods=['GET'])
 # @app.route('/api/task/<task_id>', methods=['GET'])
 # def recognition_status(task_id):
 #     if current_user.is_anonymous and current_user.is_student():
@@ -147,6 +181,7 @@ def upload_post_image():
 #     return jsonify(done=False), 201
 
 
+@app.route('/api/upload_avatar/<int:user_id>/', methods=['POST'])
 @app.route('/api/upload_avatar/<int:user_id>', methods=['POST'])
 def upload_avatar(user_id):
     if current_user.is_anonymous:
@@ -184,6 +219,7 @@ def upload_avatar(user_id):
     return 'Ok', 202
 
 
+@app.route('/api/approve_avatar/<int:avatar_id>/', methods=['POST'])
 @app.route('/api/approve_avatar/<int:avatar_id>', methods=['POST'])
 def approve_avatar(avatar_id):
     if current_user.is_anonymous or not current_user.is_moderator():
@@ -223,6 +259,7 @@ def approve_avatar(avatar_id):
     return 'Ok', 201
 
 
+@app.route('/api/reject_avatar/<int:avatar_id>/', methods=['POST'])
 @app.route('/api/reject_avatar/<int:avatar_id>', methods=['POST'])
 def reject_avatar(avatar_id):
     if current_user.is_anonymous or not current_user.is_moderator():
@@ -244,6 +281,7 @@ def reject_avatar(avatar_id):
     return 'Ok', 201
 
 
+@app.route('/api/delete_journal/<int:journal_id>/', methods=['DELETE'])
 @app.route('/api/delete_journal/<int:journal_id>', methods=['DELETE'])
 def delete_journal(journal_id):
     if current_user.is_anonymous or current_user.is_student():
@@ -274,58 +312,19 @@ def delete_journal(journal_id):
     return 'Ok', 202
 
 
+@app.route('/api/approve_journal/<int:journal_id>/', methods=['POST'])
 @app.route('/api/approve_journal/<int:journal_id>', methods=['POST'])
 def approve_journal(journal_id):
-    if current_user.is_anonymous or current_user.is_student():
-        abort(403)
-
-    if 'id' not in request.form:
-        abort(400)
-    student_id = request.form.get('id', type=int)
-
-    student = Student.query.get(student_id)
-    journal = Journal.query.get(journal_id)
-
-    if not student:
-        abort(400)
-    if not journal or journal.student_id != student.id:
-        abort(400)
-    if not current_user.is_can_edit(journal.post):
-        abort(400)
-
-    journal.post.changed = 0
-    journal.lecturer_proved = 1
-    db.session.commit()
-
-    return 'Ok', 202
+    return verify_journal(journal_id=journal_id, approve=True)
 
 
+@app.route('/api/disapprove_journal/<int:journal_id>/', methods=['POST'])
 @app.route('/api/disapprove_journal/<int:journal_id>', methods=['POST'])
 def disapprove_journal(journal_id):
-    if current_user.is_anonymous or current_user.is_student():
-        abort(403)
-
-    if 'id' not in request.form:
-        abort(400)
-    student_id = request.form.get('id', type=int)
-
-    student = Student.query.get(student_id)
-    journal = Journal.query.get(journal_id)
-
-    if not student:
-        abort(400)
-    if not journal or journal.student_id != student.id:
-        abort(400)
-    if not current_user.is_can_edit(journal.post):
-        abort(400)
-
-    journal.post.changed = 0
-    journal.lecturer_proved = 0
-    db.session.commit()
-
-    return 'Ok', 202
+    return verify_journal(journal_id=journal_id)
 
 
+@app.route('/api/send_request/<int:post_id>/', methods=['POST'])
 @app.route('/api/send_request/<int:post_id>', methods=['POST'])
 def take_request(post_id):
     if current_user.is_anonymous or not current_user.is_student():
@@ -356,6 +355,7 @@ def take_request(post_id):
     return 'Ok', 202
 
 
+@app.route('/api/accept_request/<int:post_id>/', methods=['POST'])
 @app.route('/api/accept_request/<int:post_id>', methods=['POST'])
 def accept_request(post_id):
     if current_user.is_anonymous or current_user.is_student():
@@ -395,6 +395,7 @@ def accept_request(post_id):
     return 'Ok', 202
 
 
+@app.route('/api/cancel_request/<int:post_id>/', methods=['POST'])
 @app.route('/api/cancel_request/<int:post_id>', methods=['POST'])
 def cancel_request(post_id):
     if current_user.is_anonymous:
@@ -408,9 +409,8 @@ def cancel_request(post_id):
         abort(400)
 
     user_id = request.form.get('id', type=int)
-    if current_user.is_student():
-        if current_user.id != user_id:
-            abort(400)
+    if current_user.is_student() and current_user.id != user_id:
+        abort(400)
 
     user = User.query.get(user_id)
     if not user:
@@ -438,20 +438,33 @@ def index():
     return render_template('index.html', title='Home')
 
 
+@app.route('/messages/')
 @app.route('/messages')
 @login_required
 def messages():
-    messages_ = current_user.messages_received.order_by(Message.timestamp.desc()).all()
+    page = request.args.get(get_page_parameter(), type=int, default=1)
+    per_page = 10
+
+    messages = current_user.messages_received.order_by(Message.timestamp.desc())
+
+    pagination = Pagination(page=page, per_page=per_page, total=messages.count(), bs_version=4)
+
+    paginate_messages = messages
+
+    messages = messages.all()
 
     current_user.last_message_read_time = datetime.datetime.utcnow()
-    for msg in messages_:
+    for msg in messages:
         msg._is_read = msg.is_read
         msg.is_read = 1
     db.session.commit()
 
-    return render_template('messages.html', title='Уведомления', messages=messages_)
+    return render_template('messages.html', title='Уведомления',
+                           messages=paginate_messages.paginate(page=page, per_page=per_page, error_out=True).items,
+                           pagination=pagination)
 
 
+@app.route('/posts/')
 @app.route('/posts')
 @login_required
 def posts():
@@ -473,6 +486,7 @@ def posts():
                            pagination=pagination)
 
 
+@app.route('/post/<int:post_id>/')
 @app.route('/post/<int:post_id>')
 @login_required
 def post(post_id):
@@ -481,6 +495,7 @@ def post(post_id):
     return render_template('post.html', title='Запись', post=post)
 
 
+@app.route('/new_post/')
 @app.route('/new_post')
 @login_required
 def new_post():
@@ -492,6 +507,7 @@ def new_post():
     return render_template('new_post.html', title='Новая запись', form=form)
 
 
+@app.route('/user/<int:user_id>/')
 @app.route('/user/<int:user_id>')
 @login_required
 def profile(user_id):
@@ -501,6 +517,7 @@ def profile(user_id):
     return render_template('user.html', title='Профиль', user=user, posts=posts)
 
 
+@app.route('/user/<int:user_id>/edit/', methods=['GET', 'POST'])
 @app.route('/user/<int:user_id>/edit', methods=['GET', 'POST'])
 @login_required
 def edit_profile(user_id):
@@ -541,6 +558,7 @@ def edit_profile(user_id):
                            profile_form=profile_form, password_form=password_form, active=False)
 
 
+@app.route('/user/<int:user_id>/posts/')
 @app.route('/user/<int:user_id>/posts')
 @login_required
 def user_posts(user_id):
@@ -558,6 +576,7 @@ def user_posts(user_id):
                            pagination=pagination)
 
 
+@app.route('/login/', methods=['GET', 'POST'])
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     # Если пользователь входил ранее
@@ -582,12 +601,14 @@ def login():
     return render_template('login.html', title='Вход', form=form)
 
 
+@app.route('/logout/')
 @app.route('/logout')
 def logout():
     logout_user()
     return redirect(url_for('index'))
 
 
+@app.route('/moderation/')
 @app.route('/moderation')
 @login_required
 def moderation():
@@ -612,7 +633,7 @@ def moderation():
                            pagination=pagination)
 
 
-@app.route('/search/<name>/')
-@app.route('/search/<name>')
+@app.route('/api/search/')
+@app.route('/api/search')
 def search():
     pass

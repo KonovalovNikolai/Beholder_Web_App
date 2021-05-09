@@ -62,6 +62,24 @@
                         <a class="nav-link" href="{{ url_for("login") }}">Войти</a>
                     </li>
                 {% else %}
+                    <li class="nav-item mr-3 my-auto" style="display: inline;">
+                        {% set new_messages = current_user.new_messages() %}
+                        <div style="float: left;">
+                            <a class="nav-link m-auto p-0" href="{{ url_for('messages') }}">
+                                <i class="bi bi-bell-fill" style="font-size: 20px;"></i>
+
+                                {% if new_messages %}
+                                    <span class="badge-danger badge-pill"
+                                          style="float: right; text-align: center">
+                                    <p class="text-white m-0" style="font-size: 14px;">
+                                        {{ new_messages }}
+                                    </p>
+                                </span>
+                                    </a>
+                                    </div>
+                                {% endif %}
+                    </li>
+
                     <li class="nav-item mr-4">
                         <a class="nav-link" href="{{ url_for('profile', user_id=current_user.id) }}">
                             {{ current_user.get_fullname() }}

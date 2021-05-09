@@ -1,12 +1,13 @@
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
+from flask_bootstrap import Bootstrap
 from flask_login import LoginManager
 from flask_migrate import Migrate
-from flask_bootstrap import Bootstrap
 from flask_moment import Moment
-# from celery import Celery
+from flask_sqlalchemy import SQLAlchemy
 
 from config import Config
+
+# from celery import Celery
 
 
 # def make_celery(app):
@@ -62,6 +63,5 @@ def make_recognition():
 
 
 recognition = make_recognition()
-
 
 from app import routes, models
