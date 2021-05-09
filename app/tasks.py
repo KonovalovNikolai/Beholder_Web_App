@@ -39,12 +39,14 @@ def import_to_excel(post_id):
 
     data = {
         'ФИО': [],
+        'Группа': [],
         'Дистанция': [],
         'Подтверждён': []
     }
 
     for journal in journals:
         data['ФИО'].append(journal.student.user.get_fullname())
+        data['Группа'].append(journal.student.get_group())
         data['Дистанция'].append(journal.get_distance())
         data['Подтверждён'].append(journal.lecturer_proved)
 

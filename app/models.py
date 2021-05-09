@@ -444,6 +444,9 @@ class Student(db.Model):
             posts = posts.all()
         return posts
 
+    def get_group(self):
+        return self.group if self.group else '-'
+
     def get_vector(self):
         return np.array(json.loads(self.vector))
 

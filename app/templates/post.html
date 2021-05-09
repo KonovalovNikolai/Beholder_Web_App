@@ -89,6 +89,7 @@
                         <tr align="center">
                             <th scope="col">Фото</th>
                             <th scope="col" class="sortable">ФИО</th>
+                            <th scope="col" class="sortable">Группа</th>
                             <th scope="col" class="sortable">Точность</th>
                             <th scope="col" class="sortable">Подтверждён</th>
                             {% if current_user.is_can_edit(post) %}
@@ -107,20 +108,20 @@
                                     </a>
                                 </td>
                                 <td class="fullname">{{ visitor.student.user.get_fullname() }}</td>
+                                <td class="fullname">{{ visitor.student.get_group() }}</td>
                                 <td>{{ visitor.get_distance() }}</td>
-
                                 {# Пользователь может изменять запись? #}
                                 {% if current_user.is_can_edit(post) %}
                                     {# Да #}
                                     <td class="prove-td">
                                         <i class="disapproved-img bi bi-x"
-                                             alt=""
+                                           alt=""
                                                 {% if visitor.lecturer_proved != 0 %}
-                                             style="display: none;"
+                                           style="display: none;"
                                                 {% endif %}></i>
                                         <i class="approved-img bi bi-check"
                                                 {% if visitor.lecturer_proved == 0 %}
-                                             style="display: none;"
+                                           style="display: none;"
                                                 {% endif %}>
                                         </i>
                                     </td>
@@ -187,8 +188,12 @@
                         <input type="text" class="table-search form-control pull-right" id="request-search"
                                placeholder="Поиск по таблице">
                         <div class="btn-group pl-0" role="group" aria-label="Basic example">
-                            <button id="accept-selected" type="button" class="btn btn-success">Принять выделенные запросы</button>
-                            <button id="cancel-selected" type="button" class="btn btn-danger">Отклонить выделенные запросы</button>
+                            <button id="accept-selected" type="button" class="btn btn-success">Принять выделенные
+                                запросы
+                            </button>
+                            <button id="cancel-selected" type="button" class="btn btn-danger">Отклонить выделенные
+                                запросы
+                            </button>
                         </div>
                         <table id="request-table" class="searchable-table table table-striped">
                             <thead>
@@ -196,6 +201,7 @@
                                 <th scope="col"><input type="checkbox" id="header-checkbox"/></th>
                                 <th scope="col">Фото</th>
                                 <th scope="col">ФИО</th>
+                                <th scope="col">Группа</th>
                                 <th scope="col">Время</th>
                                 <th scope="col"></th>
                             </tr>
@@ -211,6 +217,7 @@
                                         </a>
                                     </td>
                                     <td class="fullname">{{ request.user.get_fullname() }}</td>
+                                    <td class="fullname">{{ request.user.get_student().get_group() }}</td>
                                     <td>{{ moment(request.timestamp).fromNow() }}</td>
                                     <td class="button-td">
                                         <div class="btn-group" role="group" aria-label="Basic example">
