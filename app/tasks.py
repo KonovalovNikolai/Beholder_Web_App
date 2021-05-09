@@ -1,13 +1,13 @@
 import pandas as pd
 import uuid
 
-# from app import celery, recognition, db
+from app import celery, recognition, db
 from app import app
 from app import recognition, db
 from app.models import Student, Post, Journal, User
 
 
-# @celery.task()
+@celery.task()
 def recognize_task(post_id):
     post = Post.query.get(post_id)
 

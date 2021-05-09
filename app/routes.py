@@ -11,7 +11,7 @@ from werkzeug.utils import secure_filename
 from app import app, db, recognition
 from app.forms import ChangePasswordForm, CreatePostForm, EditProfileForm, LoginForm
 from app.models import Avatar, Image, Journal, Post, Request, Student, User, Message
-# from app.tasks import recognize_task
+from app.tasks import recognize_task
 from app.tasks import import_to_excel
 
 
@@ -127,22 +127,22 @@ def upload_post_image():
     db.session.add(post)
     db.session.commit()
 
-    # task = recognize_task.delay(post_id=post.id)
-    # return jsonify(url=url_for('recognition_status', task_id=task.id)), 201
-    return "Ok", 201
+    task = recognize_task.delay(post_id=post.id)
+    return jsonify(url=url_for('recognition_status', task_id=task.id)), 201
+    # return "Ok", 201
 
 
-# @app.route('/api/task/<task_id>', methods=['GET'])
-# def recognition_status(task_id):
-#     if current_user.is_anonymous and current_user.is_student():
-#         return abort(403)
-#
-#     task = recognize_task.AsyncResult(task_id)
-#     if task.ready():
-#         post_id = task.get()
-#         print(post_id)
-#         return jsonify(done=True, url=url_for('post', post_id=post_id)), 201
-#     return jsonify(done=False), 201
+@app.route('/api/task/<task_id>', methods=['GET'])
+def recognition_status(task_id):
+    if current_user.is_anonymous and current_user.is_student():
+        return abort(403)
+
+    task = recognize_task.AsyncResult(task_id)
+    if task.ready():
+        post_id = task.get()
+        print(post_id)
+        return jsonify(done=True, url=url_for('post', post_id=post_id)), 201
+    return jsonify(done=False), 201
 
 
 @app.route('/api/upload_avatar/<int:user_id>', methods=['POST'])
@@ -431,9 +431,9 @@ def cancel_request(post_id):
     return 'Ok', 202
 
 
-@app.route('/')
-def index():
-    return render_template('index.html', title='Home')
+# @app.route('/')
+# def index():
+#     return render_template('index.html', title='Home')
 
 
 @app.route('/messages')
@@ -553,6 +553,7 @@ def user_posts(user_id):
                            next_url=next_url, prev_url=prev_url)
 
 
+@app.route('/')
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     # Если пользователь входил ранее

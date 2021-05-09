@@ -4,27 +4,27 @@ from flask_login import LoginManager
 from flask_migrate import Migrate
 from flask_bootstrap import Bootstrap
 from flask_moment import Moment
-# from celery import Celery
+from celery import Celery
 
 from config import Config
 
 
-# def make_celery(app):
-#     app = app
-#     celery = Celery(
-#         app.import_name,
-#         backend=app.config['CELERY_BROKER_URL'],
-#         broker=app.config['CELERY_RESULT_BACKEND']
-#     )
-#     celery.conf.update(app.config)
-#
-#     class ContextTask(celery.Task):
-#         def __call__(self, *args, **kwargs):
-#             with app.app_context():
-#                 return self.run(*args, **kwargs)
-#
-#     celery.Task = ContextTask
-#     return celery
+def make_celery(app):
+    app = app
+    celery = Celery(
+        app.import_name,
+        backend=app.config['CELERY_BROKER_URL'],
+        broker=app.config['CELERY_RESULT_BACKEND']
+    )
+    celery.conf.update(app.config)
+
+    class ContextTask(celery.Task):
+        def __call__(self, *args, **kwargs):
+            with app.app_context():
+                return self.run(*args, **kwargs)
+
+    celery.Task = ContextTask
+    return celery
 
 
 app = Flask(__name__)
@@ -42,7 +42,7 @@ migrate = Migrate(app, db)
 
 moment = Moment(app)
 
-# celery = make_celery(app)
+celery = make_celery(app)
 
 from app.recognition import FaceRecognition
 from app.models import Student
