@@ -49,6 +49,7 @@ from app.recognition import FaceRecognition
 from app.models import Student
 
 
+"""
 def make_recognition():
     students = Student.query.filter(Student.vector.isnot(None)).all()
 
@@ -63,6 +64,7 @@ def make_recognition():
 
 
 recognition = make_recognition()
+"""
 
 
 from app import routes, models
