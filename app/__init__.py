@@ -38,7 +38,6 @@ login.login_message = 'Пожалуйста, авторизуйтесь, что�
 login.login_message_category = 'secondary'
 
 db = SQLAlchemy(app)
-db.create_all()
 migrate = Migrate(app, db)
 
 moment = Moment(app)
