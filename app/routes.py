@@ -553,7 +553,7 @@ def user_posts(user_id):
                            next_url=next_url, prev_url=prev_url)
 
 
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     # Если пользователь входил ранее
