@@ -556,7 +556,7 @@ def user_posts(user_id):
                            pagination=pagination)
 
 
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     # Если пользователь входил ранее
