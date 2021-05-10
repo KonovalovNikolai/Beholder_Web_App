@@ -558,7 +558,7 @@ def user_posts(user_id):
 def login():
     # Если пользователь входил ранее
     if current_user.is_authenticated:
-        return redirect(url_for('index'))
+        return redirect(url_for('posts'))
 
     form = LoginForm()
 
@@ -573,7 +573,7 @@ def login():
 
         login_user(user, remember=form.remember_me.data)
         flash(f'Успешный вход. Добро пожаловать, {current_user.get_fullname()}!', 'success')
-        return redirect(url_for('index'))
+        return redirect(url_for('posts'))
 
     return render_template('login.html', title='Вход', form=form)
 
