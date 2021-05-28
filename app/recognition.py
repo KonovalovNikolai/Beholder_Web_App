@@ -1,4 +1,4 @@
-from threading import Lock
+from multiprocessing import Lock
 import face_recognition
 import numpy as np
 import copy
