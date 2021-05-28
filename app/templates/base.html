@@ -20,10 +20,13 @@
             integrity="sha512-+NqPlbbtM1QqiK8ZAo4Yrj2c4lNQoGv8P79DPtKzj++l5jnN39rHA/xsqn8zE9l0uSoxaCdrOgFs6yjyfbBxSg=="
             crossorigin="anonymous">
     </script>
-    <link rel="stylesheet" href="{{ url_for('.static', filename='css/bootstrap.css') }}">
-    <link rel="stylesheet" href="{{ url_for('.static', filename='css/custom.css') }}">
+    <link type="text/css" rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"
+          integrity="sha256-T/zFmO5s/0aSwc6ics2KLxlfbewyRz6UNw1s3Ppf5gE=" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css">
-    <script src="{{ url_for('.static', filename='js/bootstrap.js') }}"></script>
+    <script type="application/javascript" src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.min.js"
+            integrity="sha256-7dA7lq5P94hkBsWdff7qobYkp9ope/L5LQy2t/ljPLo=" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="{{ url_for('.static', filename='css/custom.css') }}">
 
     {% block styles %}
     {% endblock %}
@@ -62,17 +65,16 @@
                             <a class="nav-link m-auto p-0" href="{{ url_for('messages') }}">
                                 <i class="bi bi-bell-fill" style="font-size: 20px;"></i>
 
-                            {% if new_messages %}
-                                <span class="badge-danger badge-pill"
-                                     style="float: right; text-align: center">
+                                {% if new_messages %}
+                                    <span class="badge-danger badge-pill"
+                                          style="float: right; text-align: center">
                                     <p class="text-white m-0" style="font-size: 14px;">
                                         {{ new_messages }}
                                     </p>
                                 </span>
-                                </a>
-                                </div>
-                            {% endif %}
-
+                                    </a>
+                                    </div>
+                                {% endif %}
 
 
                     </li>

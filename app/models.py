@@ -244,6 +244,8 @@ class User(UserMixin, db.Model):
                 return True
             return False
 
+        return False
+
     def _make_student(self):
         """
         Создать объект студента для данного пользователя.

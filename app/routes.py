@@ -399,6 +399,12 @@ def cancel_request(post_id):
         abort(403)
 
     post = Post.query.get(post_id)
+
+    if current_user.is_student():
+        post.requests.filter(Request.post_id == post_id, Request.user_id == current_user.id).delete()
+        db.session.commit()
+        return 'Ok', 202
+
     if not current_user.is_can_edit(post):
         abort(400)
 
@@ -428,6 +434,26 @@ def cancel_request(post_id):
     post.requests.filter(Request.post_id == post_id, Request.user_id == user_id).delete()
     db.session.commit()
 
+    return 'Ok', 202
+
+
+@app.route('/api/delete_post/<int:post_id>', methods=['DELETE'])
+def delete_post(post_id):
+    if current_user.is_anonymous:
+        abort(403)
+
+    post = Post.query.get(post_id)
+    if not post:
+        abort(404)
+
+    if not current_user.is_can_edit(post):
+        abort(405)
+
+    post.requests.delete()
+    post.images.delete()
+    post.journals.delete()
+    db.session.delete(post)
+    db.session.commit()
     return 'Ok', 202
 
 
