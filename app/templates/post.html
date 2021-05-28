@@ -244,10 +244,19 @@
             </details>
         {% endif %}
 
-        <button id="excel-download" class="btn btn-primary" type="button"
-                data-url="{{ url_for('download_excel', post_id=post.id) }}">
-            Экспортировать запись в Exel
-        </button>
+        <div class="d-flex justify-content-between">
+            <button id="excel-download" class="btn btn-primary" type="button"
+                    data-url="{{ url_for('download_excel', post_id=post.id) }}">
+                Экспортировать запись в Exel
+            </button>
+
+            {% if current_user.is_can_edit(post) %}
+                <button type="button" id="delete_post_button" class="btn btn-link"
+                        data-url="{{ url_for("delete_post", post_id=post.id) }}">
+                    Удалить запись
+                </button>
+            {% endif %}
+        </div>
     </div>
 {% endblock %}
 

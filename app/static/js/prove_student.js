@@ -48,3 +48,22 @@ $('.delete-journal-button').click(function () {
         }
     });
 });
+
+$('#delete_post_button').click(function () {
+    var button = this;
+    $(this).attr('disabled', 'disabled');
+
+    var url = $(this).data('url');
+
+    $.ajax({
+        url: url,
+        type: 'DELETE',
+        success: function (response) {
+            window.location.href = "/posts";
+        },
+        error: function (response) {
+            alert('Что-то пошло не так.\nПопробуйте ещё раз позже.');
+            $(button).removeAttr('disabled');
+        }
+    });
+});
