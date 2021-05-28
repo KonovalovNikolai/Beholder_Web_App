@@ -449,6 +449,9 @@ def delete_post(post_id):
     if not current_user.is_can_edit(post):
         abort(405)
 
+    post.requests.delete()
+    post.images.delete()
+    post.journals.delete()
     db.session.delete(post)
     db.session.commit()
     return 'Ok', 202
