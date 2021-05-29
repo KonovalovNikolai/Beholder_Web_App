@@ -154,7 +154,10 @@ def upload_avatar(user_id):
     user = User.query.get(user_id)
     if not user or not current_user.is_can_edit(user):
         abort(403)
-
+    
+    flash('Данное действие временно отключено', 'warning')
+    return 'Ok', 202
+    
     f = request.files['file']
     filename = secure_filename(f.filename)
     if filename == '':
@@ -537,7 +540,11 @@ def edit_profile(user_id):
 
     profile_form = EditProfileForm()
     password_form = ChangePasswordForm()
-
+  
+    request.method == 'POST':
+        flash('Данное действие временно отключено', 'warning')
+        return redirect(url_for('edit_profile', user_id=user_id))
+    
     # Обработка формы изменения личной информации
     if profile_form.form_name in request.form and profile_form.validate_on_submit():
         user.update_from_form(profile_form)
