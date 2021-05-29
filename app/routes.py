@@ -58,6 +58,7 @@ def download_excel(post_id):
     if not post:
         abort(403)
 
+    print(post)
     import_to_excel(post_id)
 
     return jsonify(url=url_for('download_file', filename=post.excel_file_name))

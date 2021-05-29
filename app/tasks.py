@@ -10,7 +10,7 @@ from app.models import Student, Post, Journal, User
 @celery.task()
 def recognize_task(post_id):
     post = Post.query.get(post_id)
-
+    print(post)
     images = post.get_images()
     images_path = [image.get_path() for image in images]
 
@@ -32,8 +32,8 @@ def recognize_task(post_id):
 def import_to_excel(post_id):
     post = Post.query.get(post_id)
 
-    if post.changed == 1:
-        return post.get_excel_path()
+    #if post.changed == 1:
+    #    return post.get_excel_path()
 
     journals = post.journals.all()
 
@@ -59,7 +59,7 @@ def import_to_excel(post_id):
 
     df = pd.DataFrame(data)
     df.to_excel(path)
-
+    print(path)
     post.changed = 1
     db.session.commit()
 
